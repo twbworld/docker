@@ -29,6 +29,7 @@ services:
         hostname: nginx_hostname
         ports:
             - 80:80
+            - 443:443
         working_dir: /usr/share/nginx #进入容器的默认目录
         volumes:
             - ${PWD}/conf/nginx.conf:/etc/nginx/nginx.conf:ro #nginx根配置
@@ -50,7 +51,7 @@ services:
             - blog
         networks:
             net1:
-                ipv4_address: 172.1.1.2
+                ipv4_address: 172.1.1.99
 
     language:
         build:
@@ -60,6 +61,7 @@ services:
         container_name: php_container_name
         hostname: php_hostname
         ports:
+            - 9000:9000
             - 9501:9501
         working_dir: /usr/share/nginx #进入容器的默认目录
         volumes:
@@ -71,7 +73,7 @@ services:
         logging: *default-logging
         networks:
             net1:
-                ipv4_address: 172.1.1.3
+                ipv4_address: 172.1.1.98
 
     sql:
         image: mysql:8.0
@@ -82,6 +84,7 @@ services:
         volumes:
             - ${PWD}/../admin/docs/tp.sql:/docker-entrypoint-initdb.d/tp.sql:ro #把sql放在docker-entrypoint-initdb.d下,mysql会自动执行
             - /usr/local/mysql8-docker/data/:/var/lib/mysql:rw #库数据
+            - ${PWD}/conf/mysql8.cnf:/etc/mysql/conf.d/mysql8.cnf:ro #配置文件
         environment: #设置环境变量
             - TZ=Asia/Shanghai
             - MYSQL_ROOT_PASSWORD=tp
@@ -92,19 +95,21 @@ services:
         logging: *default-logging
         networks:
             net1:
-                ipv4_address: 172.1.1.4
+                ipv4_address: 172.1.1.97
 
     nosql:
         image: redis:6.0
         container_name: redis_container_name
         hostname: redis_hostname
+        ports:
+            - 6379:6379
         environment:
             - TZ=Asia/Shanghai
         restart: always
         logging: *default-logging
         networks:
             net1:
-                ipv4_address: 172.1.1.5
+                ipv4_address: 172.1.1.96
 
     blog:
         build:
@@ -127,4 +132,4 @@ services:
         logging: *default-logging
         networks:
             net1:
-                ipv4_address: 172.1.1.6
+                ipv4_address: 172.1.1.95

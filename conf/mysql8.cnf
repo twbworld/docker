@@ -1,0 +1,3 @@
+# 配置mysql内存,内存不足可以适当减少(建议主机配置swap虚拟内存)
+[mysqld]
+innodb_buffer_pool_size = 128
