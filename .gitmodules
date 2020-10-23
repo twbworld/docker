@@ -1,0 +1,6 @@
+[submodule "conf/php-phalcon-swoole-redis"]
+	path = conf/php-phalcon-swoole-redis
+	url = https://github.com/twbworld/docker-php-phalcon-swoole-redis.git
+[submodule "conf/hugo-go-git"]
+	path = conf/hugo-go-git
+	url = https://github.com/twbworld/docker-hugo-go-git.git
