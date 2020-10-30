@@ -29,7 +29,7 @@ services:
         hostname: nginx_hostname
         ports:
             - 80:80
-            - 443:443
+            #- 443:443
         working_dir: /usr/share/nginx #进入容器的默认目录
         volumes:
             - ${PWD}/conf/nginx.conf:/etc/nginx/nginx.conf:ro #nginx根配置
