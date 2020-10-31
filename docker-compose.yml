@@ -23,10 +23,10 @@ x-logging: &default-logging
         max-file: "10"
 
 services:
-    web:
+    nginx:
         image: nginx:1.19
-        container_name: nginx_container_name
-        hostname: nginx_hostname
+        container_name: nginx
+        hostname: docker-nginx
         ports:
             - 80:80
             #- 443:443
@@ -45,21 +45,21 @@ services:
         restart: always
         logging: *default-logging
         depends_on: #启动顺序
-            - sql
-            - nosql
-            - language
-            - blog
+            - mysql
+            - redis
+            - php
+            - hugo
         networks:
             net1:
                 ipv4_address: 172.1.1.99
 
-    language:
+    php:
         build:
             context: ${PWD}/conf/php-phalcon-swoole-redis
             dockerfile: Dockerfile
         image: twbworld/php-phalcon-swoole-redis:latest
-        container_name: php_container_name
-        hostname: php_hostname
+        container_name: php
+        hostname: docker-php
         ports:
             - 9000:9000
             - 9501:9501
@@ -75,15 +75,15 @@ services:
             net1:
                 ipv4_address: 172.1.1.98
 
-    sql:
+    mysql:
         image: mysql:8.0
-        container_name: mysql_container_name
-        hostname: mysql_hostname
+        container_name: mysql
+        hostname: docker-mysql
         ports:
             - 3306:3306
         volumes:
             - ${PWD}/../admin/docs/tp.sql:/docker-entrypoint-initdb.d/tp.sql:ro #把sql放在docker-entrypoint-initdb.d下,mysql会自动执行
-            - /usr/local/mysql8-docker/data/:/var/lib/mysql:rw #库数据
+            #- /usr/local/mysql8-docker/data/:/var/lib/mysql:rw #库数据,一旦使用,设置的环境变量和自动执行sql功能则失效
             - ${PWD}/conf/mysql8.cnf:/etc/mysql/conf.d/mysql8.cnf:ro #配置文件
         environment: #设置环境变量
             - TZ=Asia/Shanghai
@@ -97,10 +97,10 @@ services:
             net1:
                 ipv4_address: 172.1.1.97
 
-    nosql:
+    redis:
         image: redis:6.0
-        container_name: redis_container_name
-        hostname: redis_hostname
+        container_name: redis
+        hostname: docker-redis
         ports:
             - 6379:6379
         environment:
@@ -111,13 +111,13 @@ services:
             net1:
                 ipv4_address: 172.1.1.96
 
-    blog:
+    hugo:
         build:
             context: ${PWD}/conf/hugo-go-git
             dockerfile: Dockerfile
         image: twbworld/hugo-go-git:latest
-        container_name: blog_container_name
-        hostname: blog_hostname
+        container_name: hugo
+        hostname: docker-hugo
         working_dir: /src
         command: server
         ports:
