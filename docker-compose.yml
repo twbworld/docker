@@ -84,7 +84,7 @@ services:
             - 3306:3306
         volumes:
             - ${PWD}/../admin/docs/tp.sql:/docker-entrypoint-initdb.d/tp.sql:ro #把sql放在docker-entrypoint-initdb.d下,mysql会自动执行
-            #- /usr/local/mysql8-docker/data/:/var/lib/mysql:rw #库数据,一旦使用,设置的环境变量和自动执行sql功能则失效
+            - /usr/local/mysql8-docker/data/:/var/lib/mysql:rw #库数据,一旦使用,设置的环境变量和自动执行sql功能则失效
             - ${PWD}/conf/mysql8.cnf:/etc/mysql/conf.d/mysql8.cnf:ro #配置文件
         environment: #设置环境变量
             - TZ=Asia/Shanghai
