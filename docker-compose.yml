@@ -35,10 +35,11 @@ services:
             - ${PWD}/conf/nginx.conf:/etc/nginx/nginx.conf:ro #nginx根配置
             - ${PWD}/conf/default.conf:/etc/nginx/conf.d/default.conf:ro #nginx配置
             - ${PWD}/conf/tp.top.conf:/etc/nginx/conf.d/tp.top.conf:ro #nginx配置
-            - ${PWD}/conf/twbhub.top.conf:/etc/nginx/conf.d/twbhub.top.conf:ro #nginx配置
+            - ${PWD}/conf/twbhub.com.conf:/etc/nginx/conf.d/twbhub.com.conf:ro #nginx配置
             - ${PWD}/conf/twbhub.cf.conf:/etc/nginx/conf.d/twbhub.cf.conf:ro #nginx配置
             - ${PWD}/../admin:/usr/share/nginx/tp:rw #运行目录
             - ${PWD}/../oneindex:/usr/share/nginx/oneindex:rw #运行目录
+            - ${PWD}/../proxy:/usr/share/nginx/proxy:rw #运行目录
             - my_volume:/usr/share/nginx/logs:rw #日志
         environment:
             - TZ=Asia/Shanghai
