@@ -69,7 +69,8 @@ services:
             - ${PWD}/../admin:/usr/share/nginx/tp:rw
             - ${PWD}/../oneindex:/usr/share/nginx/oneindex:rw
             - ${PWD}/../proxy:/usr/share/nginx/proxy:rw
-            - /root/.ssh/id_rsa:/root/.ssh/id_rsa:ro #ssh私钥,用于github验证
+            - /root/.ssh/id_rsa:/var/www/.ssh/id_rsa:ro #ssh私钥,用于github验证
+            - /root/.ssh/known_hosts:/var/www/.ssh/known_hosts:ro #记录github服务器的白名单
         environment:
             - TZ=Asia/Shanghai
         restart: always
