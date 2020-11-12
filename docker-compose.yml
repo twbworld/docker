@@ -73,7 +73,7 @@ services:
             - /root/.ssh/id_rsa:/var/www/.ssh/id_rsa:ro #ssh私钥,用于github验证
             - /root/.ssh/known_hosts:/var/www/.ssh/known_hosts:ro #记录github服务器的白名单
         command:
-           bash -c "service cron start && docker-php-entrypoint php-fpm" #启动cron
+           bash -c "docker-php-entrypoint php-fpm && service cron start" #启动cron
         environment:
             - TZ=Asia/Shanghai
         restart: always
