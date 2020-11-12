@@ -49,7 +49,7 @@ services:
             - mysql
             - redis
             - php
-            #- hugo
+            - hugo
         networks:
             net1:
                 ipv4_address: 172.1.1.99
@@ -118,25 +118,25 @@ services:
             net1:
                 ipv4_address: 172.1.1.96
 
-#    hugo:
-#        build:
-#            context: ${PWD}/conf/hugo-go-git
-#            dockerfile: Dockerfile
-#        image: twbworld/hugo-go-git:latest
-#        container_name: hugo
-#        hostname: docker-hugo
-#        working_dir: /src
-#        command: server
-#        ports:
-#            - 1313:1313
-#        volumes:
-#            - ${PWD}/../blog:/src:rw #hugo项目的根目录
-#        environment:
-#            - TZ=Asia/Shanghai
-#            - HUGO_BIND=0.0.0.0
-#            - HUGO_ENV=DEV # DEV || production
-#        restart: always
-#        logging: *default-logging
-#        networks:
-#            net1:
-#                ipv4_address: 172.1.1.95
+    hugo:
+        build:
+            context: ${PWD}/conf/hugo-go-git
+            dockerfile: Dockerfile
+        image: twbworld/hugo-go-git:latest
+        container_name: hugo
+        hostname: docker-hugo
+        working_dir: /src
+        command: server
+        ports:
+            - 1313:1313
+        volumes:
+            - ${PWD}/../blog:/src:rw #hugo项目的根目录
+        environment:
+            - TZ=Asia/Shanghai
+            - HUGO_BIND=0.0.0.0
+            - HUGO_ENV=DEV # DEV || production
+        restart: always
+        logging: *default-logging
+        networks:
+            net1:
+                ipv4_address: 172.1.1.95
