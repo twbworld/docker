@@ -1,3 +1,9 @@
-# 配置mysql内存,内存不足可以适当减少(建议主机配置swap虚拟内存)
 [mysqld]
+# 配置mysql内存,内存不足可以适当减少(建议主机配置swap虚拟内存)
 innodb_buffer_pool_size = 128
+
+# mysql8使用了caching_sha2_password,php版本不兼容,改为mysql_native_password
+# 同时还有执行: 
+# ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'tp';
+# ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'tp';
+default_authentication_plugin = mysql_native_password
