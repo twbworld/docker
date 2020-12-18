@@ -34,7 +34,7 @@ services:
         volumes:
             - ${PWD}/conf/nginx.conf:/etc/nginx/nginx.conf:ro #nginx根配置
             - ${PWD}/conf/default.conf:/etc/nginx/conf.d/default.conf:ro #nginx配置
-            - ${PWD}/conf/tp.top.conf:/etc/nginx/conf.d/tp.top.conf:ro #nginx配置
+            - ${PWD}/conf/cc.cc.conf:/etc/nginx/conf.d/cc.cc.conf:ro #nginx配置
             - ${PWD}/conf/twbhub.com.conf:/etc/nginx/conf.d/twbhub.com.conf:ro #nginx配置
             - ${PWD}/conf/twbhub.cf.conf:/etc/nginx/conf.d/twbhub.cf.conf:ro #nginx配置
             - ${PWD}/../admin:/usr/share/nginx/tp:rw #运行目录
