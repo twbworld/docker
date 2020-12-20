@@ -97,7 +97,7 @@ services:
             - MYSQL_ROOT_PASSWORD=tp
             - MYSQL_USER=tp
             - MYSQL_PASSWORD=tp
-            - MYSQL_DATABASE=tp
+            # - MYSQL_DATABASE=tp
         restart: always
         logging: *default-logging
         networks:
