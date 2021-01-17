@@ -38,6 +38,9 @@ services:
             - ${PWD}/conf/twbhub.com.conf:/etc/nginx/conf.d/twbhub.com.conf:ro #nginx配置
             #- ${PWD}/conf/twbhub.cf.conf:/etc/nginx/conf.d/twbhub.cf.conf:ro #nginx配置
             - ${PWD}/../admin:/usr/share/nginx/tp:rw #运行目录
+            - ${PWD}/../phalcon_shop:/usr/share/nginx/phalcon_shop:rw #运行目录
+            - ${PWD}/../../erp:/usr/share/nginx/erp:rw #运行目录
+            - ${PWD}/../../vue/dist:/usr/share/nginx/vue:rw #运行目录
             - ${PWD}/../oneindex:/usr/share/nginx/oneindex:rw #运行目录
             - ${PWD}/../proxy:/usr/share/nginx/proxy:rw #运行目录
             - my_volume:/usr/share/nginx/logs:rw #日志
@@ -47,8 +50,10 @@ services:
         logging: *default-logging
         depends_on: #启动顺序
             - mysql
+            - mysql56
             - redis
             - php
+            - php56
             - hugo
         networks:
             net1:
@@ -68,6 +73,8 @@ services:
         volumes:
             - ${PWD}/../admin:/usr/share/nginx/tp:rw
             - ${PWD}/../oneindex:/usr/share/nginx/oneindex:rw
+            - ${PWD}/../../vue/dist:/usr/share/nginx/vue:rw #运行目录
+            - ${PWD}/../phalcon_shop:/usr/share/nginx/phalcon_shop:rw #运行目录
             - ${PWD}/../proxy:/usr/share/nginx/proxy:rw
             - ${PWD}/../proxy/task.sh:/etc/cron.monthly/task.sh:rw #定时任务
             - /root/.ssh/id_rsa:/var/www/.ssh/id_rsa:ro #ssh私钥,用于github验证
@@ -82,6 +89,25 @@ services:
             net1:
                 ipv4_address: 172.1.1.98
 
+    php56:
+        image: twbworld/php-phalcon-swoole-redis:php-5.6
+        container_name: php56
+        hostname: docker-php
+        working_dir: /usr/share/nginx #进入容器的默认目录
+        volumes:
+            - ${PWD}/../../erp:/usr/share/nginx/erp:rw #运行目录
+            - /root/.ssh/id_rsa:/var/www/.ssh/id_rsa:ro #ssh私钥,用于github验证
+            - /root/.ssh/known_hosts:/var/www/.ssh/known_hosts:ro #记录github服务器的白名单
+        command:
+           bash -c "docker-php-entrypoint php-fpm && service cron start" #启动cron
+        environment:
+            - TZ=Asia/Shanghai
+        restart: always
+        logging: *default-logging
+        networks:
+            net1:
+                ipv4_address: 172.1.1.94
+
     mysql:
         image: mysql:8.0
         container_name: mysql
@@ -90,6 +116,7 @@ services:
             - 3306:3306
         volumes:
             - ${PWD}/../admin/docs/tp.sql:/docker-entrypoint-initdb.d/tp.sql:ro #把sql放在docker-entrypoint-initdb.d下,mysql会自动执行
+            - ${PWD}/../phalcon_shop/docs/panda36_all.sql:/docker-entrypoint-initdb.d/panda36_all.sql:ro
             - /usr/local/mysql8-docker/data/:/var/lib/mysql:rw #库数据,一旦使用,设置的环境变量和自动执行sql功能则失效
             - ${PWD}/conf/mysql8.cnf:/etc/mysql/conf.d/mysql8.cnf:ro #配置文件
         environment: #设置环境变量
@@ -103,6 +130,28 @@ services:
         networks:
             net1:
                 ipv4_address: 172.1.1.97
+
+    mysql56:
+        image: mysql:5.6
+        container_name: mysql56
+        hostname: docker-mysql
+        ports:
+            - 3307:3306
+        volumes:
+            - ${PWD}/../../erp/yanming.sql:/docker-entrypoint-initdb.d/yanming.sql:ro #把sql放在docker-entrypoint-initdb.d下,mysql会自动执行
+            - /usr/local/mysql5-docker/data/:/var/lib/mysql:rw #库数据,一旦使用,设置的环境变量和自动执行sql功能则失效
+            - ${PWD}/conf/mysql8.cnf:/etc/mysql/conf.d/mysql8.cnf:ro #配置文件
+        environment: #设置环境变量
+            - TZ=Asia/Shanghai
+            - MYSQL_ROOT_PASSWORD=root
+            - MYSQL_USER=tp
+            - MYSQL_PASSWORD=tp
+            - MYSQL_DATABASE=yanming
+        restart: always
+        logging: *default-logging
+        networks:
+            net1:
+                ipv4_address: 172.1.1.93
 
     redis:
         image: redis:6.0
