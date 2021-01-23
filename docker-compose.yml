@@ -173,6 +173,7 @@ services:
             - 1313:1313
         volumes:
             - ${PWD}/../twbworld.GitHub.io:/src:rw #hugo项目的根目录
+            - /tmp/hugo_cache/:/tmp/hugo_cache/:rw #hugo模板缓存
         environment:
             - TZ=Asia/Shanghai
             - HUGO_BIND=0.0.0.0

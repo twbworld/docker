@@ -32,3 +32,7 @@ temp/
 #system
 *.log
 .env
+
+
+
+/worktree/
