@@ -56,9 +56,9 @@ services:
                 ipv4_address: 172.1.1.99
 
     php:
-        build:
-            context: ${PWD}/conf/php-phalcon-swoole-redis
-            dockerfile: Dockerfile
+        # build:
+        #     context: ${PWD}/conf/php-phalcon-swoole-redis
+        #     dockerfile: Dockerfile
         image: twbworld/php-phalcon-swoole-redis:latest
         container_name: php
         hostname: docker-php
