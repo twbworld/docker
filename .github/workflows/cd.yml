@@ -9,7 +9,7 @@ on:
     paths:
       - 'conf/**.conf'
 jobs:
-  update_users:
+  restart-nginx:
     runs-on: ubuntu-latest #虚拟环境(github提供)
     steps:
 
