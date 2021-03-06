@@ -1,6 +1,8 @@
 
 **docker**
 ===========
+[![](https://github.com/twbworld/docker/workflows/cd/badge.svg?branch=master)](https://github.com/twbworld/docker/actions)
+[![](https://img.shields.io/github/license/twbworld/docker)](https://github.com/twbworld/docker/blob/master/LICENSE)
 
 [![](https://img.shields.io/badge/docker-php%2d-phalcon%2d-swoole%2d-redis-099cec?logo=docker)](https://hub.docker.com/r/twbworld/php-phalcon-swoole-redis)
 [![](https://img.shields.io/badge/dockerfile-php%2d-phalcon%2d-swoole%2d-redis-00d1b2?logo=github)](https://github.com/twbworld/docker-php-phalcon-swoole-redis)
