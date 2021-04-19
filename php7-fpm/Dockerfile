@@ -1,6 +1,9 @@
 FROM php:7.3.10-fpm-alpine
 
-WORKDIR /var/www/web/
+WORKDIR /var/www/web
+
+RUN touch  /usr/local/etc/php/php.ini
+RUN touch  /usr/local/etc/php-fpm.d/www.conf
 
 RUN chmod 777 /var/www/web/ -R
 
