@@ -54,7 +54,6 @@ services:
             - ${PWD}/nginx/vhost/:/etc/nginx/vhost/:ro
             - ${PWD}/nginx/rewrite/:/etc/nginx/rewrite/:ro
             - ${PWD}/../../eelly/:/var/www/web/:rw #项目
-            - ${PWD}/data/html/:/var/www/html/:rw
             - ${PWD}/data/logs/nginx/:/var/log/nginx/:rw
         logging: *default-logging
         networks:
@@ -68,7 +67,6 @@ services:
                     - www.eelly.develop
                     - video.eelly.develop
                     - manage.eelly.develop
-
 
     php:
         # build: ./php7-fpm
@@ -93,7 +91,8 @@ services:
             - ${PWD}/php7-fpm/www.conf:/usr/local/etc/php-fpm.d/www.conf:ro
             - ${PWD}/../../eelly/:/var/www/web/:rw #项目
             - ${PWD}/data/logs/php/:/var/log/php/:rw
-            - ${PWD}/data/com/:/var/www/html:rw
+            - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro #composer下载项目需要gitee的验证
+            - ~/.ssh/id_rsa.pub:/root/.ssh/id_rsa.pub:ro
         logging: *default-logging
         networks:
             net1:
@@ -128,8 +127,8 @@ services:
         ports:
             - 3306:3306
         volumes:
-          # - ${PWD}/tp.sql:/docker-entrypoint-initdb.d/tp.sql:ro #把sql放在docker-entrypoint-initdb.d下,mysql会自动执行
-          - ${PWD}/data/mysql-data:/var/lib/mysql:rw #库数据,一旦使用,设置的环境变量和自动执行sql功能则失效
+          # - ${PWD}/data/eelly.sql:/docker-entrypoint-initdb.d/eelly.sql:ro #把sql放在docker-entrypoint-initdb.d下,mysql会自动执行
+          - ${PWD}/data/mysql-data/:/var/lib/mysql/:rw #库数据,一旦使用,设置的环境变量和自动执行sql功能则失效
           - ${PWD}/data/logs/mysql/:/var/www/logs/:rw
           - ${PWD}/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro #配置文件
         logging: *default-logging
