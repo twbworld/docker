@@ -67,6 +67,7 @@ services:
                     - www.eelly.develop
                     - video.eelly.develop
                     - manage.eelly.develop
+                    - www.127mc.develop
 
     php:
         # build: ./php7-fpm
