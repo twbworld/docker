@@ -28,7 +28,6 @@ services:
         container_name: nginx
         hostname: docker-nginx
         depends_on:
-          - redis
           - php
         restart: always
         working_dir: /var/www/html/ #进入容器的默认目录
@@ -58,10 +57,9 @@ services:
         image: ghcr.io/twbworld/php-phalcon-swoole-redis:latest
         container_name: php
         hostname: docker-php
-        depends_on:
-            - mysql
-            - mysql5
-        command: /bin/bash -c "docker-php-entrypoint php-fpm && service cron start && chmod +x /etc/cron.monthly/*" #启动cron
+        # depends_on:
+        #     - mysql5
+        # command: /bin/bash -c "docker-php-entrypoint php-fpm && service cron start && chmod +x /etc/cron.monthly/*" #启动cron
         restart: always
         working_dir: /var/www/html/ #进入容器的默认目录
         environment:
