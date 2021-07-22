@@ -57,8 +57,8 @@ services:
         image: ghcr.io/twbworld/php-phalcon-swoole-redis:latest
         container_name: php
         hostname: docker-php
-        # depends_on:
-        #     - mysql5
+        depends_on:
+            - mysql5
         # command: /bin/bash -c "docker-php-entrypoint php-fpm && service cron start && chmod +x /etc/cron.monthly/*" #启动cron
         restart: always
         working_dir: /var/www/html/ #进入容器的默认目录
@@ -83,34 +83,32 @@ services:
                   - docker-php
                   - php7
 
-    # mysql5:
-    #     image: mysql:5.7
-    #     container_name: mysql5
-    #     hostname: docker-mysql
-    #     depends_on:
-    #         - mysql
-    #     command: /bin/bash -c "chown -R www-data:www-data /var/lib/mysql /var/run/mysqld &&  mysqld"
-    #     restart: always
-    #     ports:
-    #         - 3307:3306
-    #     volumes:
-    #         - ${PWD}/../../erp/yanming.sql:/docker-entrypoint-initdb.d/yanming.sql:ro #把sql放在docker-entrypoint-initdb.d下,mysql会自动执行
-    #         - /usr/local/mysql5-docker/data/:/var/lib/mysql/:rw #库数据,一旦使用,设置的环境变量和自动执行sql功能则失效
-    #         - ${PWD}/conf/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro #配置文件
-    #         - ${PWD}/data/logs/mysql5/:/var/www/logs/:rw #日志
-    #     environment: #设置环境变量
-    #         - TZ=Asia/Shanghai
-    #         - MYSQL_ROOT_PASSWORD=root
-    #         - MYSQL_USER=tp
-    #         - MYSQL_PASSWORD=tp
-    #         - MYSQL_DATABASE=yanming
-    #     logging: *default-logging
-    #     networks:
-    #         net1:
-    #             ipv4_address: 172.1.1.95
-    #             aliases:
-    #               - mysql5
-    #               - mysql5
+    mysql5:
+        image: mysql:5.7
+        container_name: mysql5
+        hostname: docker-mysql
+        command: /bin/bash -c "chown -R www-data:www-data /var/lib/mysql /var/run/mysqld &&  mysqld"
+        restart: always
+        ports:
+            - 3306:3306
+        volumes:
+            # - ${PWD}/../wtjzy_erp.sql:/docker-entrypoint-initdb.d/wtjzy_erp.sql:ro #把sql放在docker-entrypoint-initdb.d下,mysql会自动执行
+            - /usr/local/mysql5-docker/data/:/var/lib/mysql/:rw #库数据,一旦使用,设置的环境变量和自动执行sql功能则失效
+            - ${PWD}/conf/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro #配置文件
+            - ${PWD}/data/logs/mysql5/:/var/www/logs/:rw #日志
+        environment: #设置环境变量
+            - TZ=Asia/Shanghai
+            - MYSQL_ROOT_PASSWORD=root
+            - MYSQL_USER=tp
+            - MYSQL_PASSWORD=tp
+            - MYSQL_DATABASE=wtjzy_erp
+        logging: *default-logging
+        networks:
+            net1:
+                ipv4_address: 172.1.1.95
+                aliases:
+                  - mysql
+                  - mysql5
 
     # redis:
     #     image: redis:6.0
