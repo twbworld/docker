@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 
 #创建网桥
 networks:
@@ -24,7 +24,7 @@ x-logging: &default-logging
 
 services:
     nginx:
-        image: nginx:1.19
+        image: nginx:1.21
         container_name: nginx
         hostname: docker-nginx
         depends_on:
@@ -180,7 +180,7 @@ services:
                   - mysql56
 
     redis:
-        image: redis:6.0
+        image: redis:6.2
         container_name: redis
         hostname: docker-redis
         restart: always
