@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 
 #创建网桥
 networks:
@@ -11,9 +11,9 @@ networks:
                 - subnet: 172.1.1.0/24 #指定ip段
 
 #创建卷
-volumes:
-    logs_volume:
-        name: logs_volume_name #在宿主机的目录名
+# volumes:
+#     logs_volume:
+#         name: logs_volume_name #在宿主机的目录名
 
 # 定义日志模板
 x-logging: &default-logging
@@ -24,13 +24,13 @@ x-logging: &default-logging
 
 services:
     nginx:
-        image: nginx:1.19
+        image: nginx:1.21
         container_name: nginx
         hostname: docker-nginx
         depends_on:
-          - redis
           - php
-          - php56
+          - mysql
+          - trojan
         restart: always
         working_dir: /var/www/html/ #进入容器的默认目录
         environment:
@@ -41,12 +41,8 @@ services:
         volumes:
             - ${PWD}/conf/nginx/nginx.conf:/etc/nginx/nginx.conf:ro #nginx根配置
             - ${PWD}/conf/nginx/vhost/:/etc/nginx/conf.d/:ro #nginx配置
-            - ${PWD}/../thinkPHP5.1-admin/:/var/www/html/tp/:rw #运行目录
-            - ${PWD}/../phalcon_shop/:/var/www/html/phalcon_shop/:rw #运行目录
-            - ${PWD}/../../erp/:/var/www/html/erp/:rw #运行目录
-            - ${PWD}/../../vue/dist/:/var/www/html/vue/:rw #运行目录
+            - ${PWD}/../../html/:/var/www/html/:rw
             - ${PWD}/data/logs/nginx/:/var/www/logs/:rw #日志
-            # - logs_volume:/var/www/logs/:rw
         logging: *default-logging
         networks:
             net1:
@@ -55,7 +51,7 @@ services:
                   - nginx
                   - docker-nginx
                   - twbhub.com
-                  - twbhub.cf
+                  - twbhub.top
 
     php:
         # build:
@@ -66,7 +62,6 @@ services:
         hostname: docker-php
         depends_on:
             - mysql
-            - mysql56
         command: /bin/bash -c "docker-php-entrypoint php-fpm && service cron start && chmod +x /etc/cron.monthly/*" #启动cron
         restart: always
         working_dir: /var/www/html/ #进入容器的默认目录
@@ -76,9 +71,7 @@ services:
             - 9000:9000
             - 9501:9501
         volumes:
-            - ${PWD}/../thinkPHP5.1-admin/:/var/www/html/tp/:rw #运行目录
-            - ${PWD}/../../vue/dist/:/var/www/html/vue/:rw #运行目录
-            - ${PWD}/../phalcon_shop/:/var/www/html/phalcon_shop/:rw #运行目录
+            - ${PWD}/../../html/:/var/www/html/:rw
             - ${PWD}/conf/php/php.ini:/usr/local/etc/php/php.ini:ro #php配置
             - ${PWD}/conf/php/www.conf:/usr/local/etc/php-fpm.d/www.conf:ro #php配置
             - /root/.ssh/id_rsa:/var/www/.ssh/id_rsa:ro #ssh私钥,用于github验证
@@ -93,34 +86,6 @@ services:
                   - docker-php
                   - php7
 
-    php56:
-        image: ghcr.io/twbworld/php-phalcon-swoole-redis:php-5.6
-        container_name: php56
-        hostname: docker-php
-        depends_on:
-            - php
-        command: /bin/bash -c "docker-php-entrypoint php-fpm && service cron start && chmod +x /etc/cron.monthly/*" #启动cron
-        restart: always
-        working_dir: /var/www/html/ #进入容器的默认目录
-        volumes:
-            - ${PWD}/../../erp/:/var/www/html/erp/:rw #运行目录
-            - ${PWD}/conf/php/php.ini:/usr/local/etc/php/php.ini:ro #php配置
-            - ${PWD}/conf/php/www.conf:/usr/local/etc/php-fpm.d/www.conf:ro #php配置
-            - /root/.ssh/id_rsa:/var/www/.ssh/id_rsa:ro #ssh私钥,用于github验证
-            - /root/.ssh/known_hosts:/var/www/.ssh/known_hosts:ro #记录github服务器的白名单
-            - ${PWD}/data/logs/php5/:/var/www/logs/:rw #日志
-        command:
-           bash -c "docker-php-entrypoint php-fpm && service cron start" #启动cron
-        environment:
-            - TZ=Asia/Shanghai
-        logging: *default-logging
-        networks:
-            net1:
-                ipv4_address: 172.1.1.96
-                aliases:
-                  - php5
-                  - php56
-
     mysql:
         image: mysql:8.0
         container_name: mysql
@@ -129,16 +94,10 @@ services:
         command: /bin/bash -c "chown -R www-data:www-data /var/lib/mysql /var/run/mysqld &&  mysqld"
         environment: #设置环境变量
             - TZ=Asia/Shanghai
-            - MYSQL_ROOT_PASSWORD=tp
-            - MYSQL_USER=tp
-            - MYSQL_PASSWORD=tp
-            # - MYSQL_DATABASE=tp
         ports:
             - 3306:3306
         volumes:
-            - ${PWD}/../thinkPHP5.1-admin/docs/tp.sql:/docker-entrypoint-initdb.d/tp.sql:ro #把sql放在docker-entrypoint-initdb.d下,mysql会自动执行
-            - ${PWD}/../phalcon_shop/docs/panda36_all.sql:/docker-entrypoint-initdb.d/panda36_all.sql:ro
-            - /usr/local/mysql8-docker/data/:/var/lib/mysql/:rw #库数据,一旦使用,设置的环境变量和自动执行sql功能则失效
+            - /usr/local/mysql8-docker/data/:/var/lib/mysql:rw #库数据,一旦使用,设置的环境变量和自动执行sql功能则失效
             - ${PWD}/conf/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro #配置文件
             - ${PWD}/data/logs/mysql/:/var/www/logs/:rw #日志
         logging: *default-logging
@@ -150,143 +109,28 @@ services:
                   - docker-mysql
                   - mysql8
 
-    mysql56:
-        image: mysql:5.6
-        container_name: mysql56
-        hostname: docker-mysql
+    trojan:
+        image: ghcr.io/twbworld/v2ray-trojan:latest
+        container_name: trojan
+        hostname: docker-trojan
+        tty: true
+          privileged: true
+          command: /bin/bash -c "/sbin/init"
         depends_on:
             - mysql
-        command: /bin/bash -c "chown -R www-data:www-data /var/lib/mysql /var/run/mysqld &&  mysqld"
         restart: always
-        ports:
-            - 3307:3306
-        volumes:
-            - ${PWD}/../../erp/yanming.sql:/docker-entrypoint-initdb.d/yanming.sql:ro #把sql放在docker-entrypoint-initdb.d下,mysql会自动执行
-            - /usr/local/mysql5-docker/data/:/var/lib/mysql/:rw #库数据,一旦使用,设置的环境变量和自动执行sql功能则失效
-            - ${PWD}/conf/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro #配置文件
-            - ${PWD}/data/logs/mysql5/:/var/www/logs/:rw #日志
         environment: #设置环境变量
             - TZ=Asia/Shanghai
-            - MYSQL_ROOT_PASSWORD=root
-            - MYSQL_USER=tp
-            - MYSQL_PASSWORD=tp
-            - MYSQL_DATABASE=yanming
-        logging: *default-logging
-        networks:
-            net1:
-                ipv4_address: 172.1.1.95
-                aliases:
-                  - mysql5
-                  - mysql56
-
-    redis:
-        image: redis:6.0
-        container_name: redis
-        hostname: docker-redis
-        restart: always
-        environment:
-            - TZ=Asia/Shanghai
-        ports:
-            - 6379:6379
-        logging: *default-logging
-        networks:
-            net1:
-                ipv4_address: 172.1.1.94
-                aliases:
-                  - redis
-                  - docker-redis
-                  - redis6
-
-    hugo:
-        image: ghcr.io/twbworld/hugo-go-git:latest
-        container_name: hugo
-        hostname: docker-hugo
-        working_dir: /src/
-        command: server -D --i18n-warnings
-        restart: always
-        environment:
-            - TZ=Asia/Shanghai
-            - HUGO_DESTINATION=public
-            - HUGO_BIND=0.0.0.0
-            - HUGO_ENV=DEV # DEV || production
-        ports:
-            - 1313:1313
         volumes:
-            - ${PWD}/../twbworld.GitHub.io/wowchemy/:/src/:rw #hugo项目的根目录
-            - /tmp/hugo_cache/:/tmp/hugo_cache/:rw #hugo模板缓存
+            - ${PWD}/../docker/:/root/docker/:rw
+            - /etc/localtime:/etc/localtime:ro
+            - /root/.ssh/id_rsa:/var/www/.ssh/id_rsa:ro #ssh私钥,用于github验证
+            - /root/.ssh/known_hosts:/var/www/.ssh/known_hosts:ro #记录github服务器的白名单
         logging: *default-logging
         networks:
             net1:
-                ipv4_address: 172.1.1.93
+                ipv4_address: 172.1.1.96
                 aliases:
-                  - hugo
-                  - docker-hugo
-
-    es:
-        image: elasticsearch:7.10.1
-        container_name: es
-        hostname: docker-es
-        restart: always
-        environment:
-            - ES_JAVA_OPTS=-Xms128m -Xmx512m
-            - discovery.type=single-node
-        ports:
-            - 9200:9200
-            - 9300:9300
-        volumes:
-            - /var/www/es/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
-            - /var/www/es/data/:/usr/share/elasticsearch/data/:rw
-            - /var/www/es/plugins/:/usr/share/elasticsearch/plugins/:rw
-        logging: *default-logging
-        networks:
-            net1:
-                ipv4_address: 172.1.1.92
-                aliases:
-                  - es
-                  - docker-es
-                  - es7
-
-    kibana:
-        image: kibana:7.10.1
-        container_name: kibana
-        hostname: docker-kibana
-        depends_on:
-            - es
-        restart: always
-        ports:
-            - 5601:5601
-        volumes:
-            - /var/www/es/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
-        environment:
-            - TZ=Asia/Shanghai
-            - ELASTICSEARCH_HOSTS=http://es:9200
-        logging: *default-logging
-        networks:
-            net1:
-                ipv4_address: 172.1.1.91
-                aliases:
-                  - kibana
-                  - docker-kibana
-
-    logstash:
-        image: docker.elastic.co/logstash/logstash:7.11.1
-        container_name: logstash
-        hostname: docker-logstash
-        depends_on:
-            - kibana
-        restart: always
-        environment:
-            - TZ=Asia/Shanghai
-        ports:
-            - 5044:5044
-        volumes:
-            - /var/www/es/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
-            - /var/www/es/logstash/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
-            - /var/www/es/logstash/mysql-connector-java-8.0.23/mysql-connector-java-8.0.23.jar:/usr/share/logstash/pipeline/mysql-connector-java-8.0.23.jar:rw
-        logging: *default-logging
-        networks:
-            net1:
-                ipv4_address: 172.1.1.90
-                aliases:
-                  - logstash
-                  - docker-logstash
+                  - trojan
+                  - docker-trojan
+                  - trojan-go
