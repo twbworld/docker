@@ -155,6 +155,8 @@ services:
             TELEGRAMBOTTOKEN: #tg-bot推送token
             TELEGRAMCHATID:
             #SERVERPUSHKEY: token #消息推送token
+        volumes:
+            - ${PWD}/conf/bilibili/config.json:/app-conf/config.json:ro
         logging: *default-logging
         networks:
           net1:
