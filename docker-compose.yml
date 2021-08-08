@@ -24,7 +24,7 @@ x-logging: &default-logging
 
 services:
     nginx:
-        image: nginx:1.21
+        image: nginx:${nginx:-latest}
         container_name: nginx
         hostname: docker-nginx
         depends_on:
@@ -34,7 +34,7 @@ services:
         restart: always
         working_dir: /var/www/html/ #进入容器的默认目录
         environment:
-          - TZ=Asia/Shanghai
+          TZ: ${TZ:-Asia/Shanghai}
         ports:
             - 80:80
             - 443:443
@@ -61,7 +61,7 @@ services:
         # build:
         #     context: ${PWD}/conf/php-phalcon-swoole-redis
         #     dockerfile: Dockerfile
-        image: ghcr.io/twbworld/php-phalcon-swoole-redis:latest
+        image: ghcr.io/twbworld/php-phalcon-swoole-redis:${php:-latest}
         container_name: php
         hostname: docker-php
         depends_on:
@@ -71,7 +71,7 @@ services:
         restart: always
         working_dir: /var/www/html/ #进入容器的默认目录
         environment:
-            - TZ=Asia/Shanghai
+            TZ: ${TZ:-Asia/Shanghai}
         ports:
             - 9000:9000
             - 9501:9501
@@ -94,7 +94,7 @@ services:
                   - php7
 
     php56:
-        image: ghcr.io/twbworld/php-phalcon-swoole-redis:php-5.6
+        image: ghcr.io/twbworld/php-phalcon-swoole-redis:${php56:-php-5.6}
         container_name: php56
         hostname: docker-php
         depends_on:
@@ -112,7 +112,7 @@ services:
         command:
            bash -c "docker-php-entrypoint php-fpm && service cron start" #启动cron
         environment:
-            - TZ=Asia/Shanghai
+            TZ: ${TZ:-Asia/Shanghai}
         logging: *default-logging
         networks:
             net1:
@@ -122,17 +122,17 @@ services:
                   - php56
 
     mysql:
-        image: mysql:8.0
+        image: mysql:${mysql:-latest}
         container_name: mysql
         hostname: docker-mysql
         restart: always
         command: /bin/bash -c "chown -R www-data:www-data /var/lib/mysql /var/run/mysqld &&  mysqld"
         environment: #设置环境变量
-            - TZ=Asia/Shanghai
-            - MYSQL_ROOT_PASSWORD=tp
-            - MYSQL_USER=tp
-            - MYSQL_PASSWORD=tp
-            # - MYSQL_DATABASE=tp
+            TZ: ${TZ:-Asia/Shanghai}
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+            MYSQL_USER:
+            MYSQL_PASSWORD:
+            # MYSQL_DATABASE:
         ports:
             - 3306:3306
         volumes:
@@ -151,7 +151,7 @@ services:
                   - mysql8
 
     mysql56:
-        image: mysql:5.6
+        image: mysql:${mysql56:-5.6}
         container_name: mysql56
         hostname: docker-mysql
         depends_on:
@@ -166,11 +166,11 @@ services:
             - ${PWD}/conf/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro #配置文件
             - ${PWD}/data/logs/mysql5/:/var/www/logs/:rw #日志
         environment: #设置环境变量
-            - TZ=Asia/Shanghai
-            - MYSQL_ROOT_PASSWORD=root
-            - MYSQL_USER=tp
-            - MYSQL_PASSWORD=tp
-            - MYSQL_DATABASE=yanming
+            TZ: ${TZ:-Asia/Shanghai}
+            MYSQL_ROOT_PASSWORD: ${MYSQL5_ROOT_PASSWORD:-root}
+            MYSQL_USER:
+            MYSQL_PASSWORD:
+            MYSQL_DATABASE:
         logging: *default-logging
         networks:
             net1:
@@ -180,12 +180,12 @@ services:
                   - mysql56
 
     redis:
-        image: redis:6.2
+        image: redis:${redis:-latest}
         container_name: redis
         hostname: docker-redis
         restart: always
         environment:
-            - TZ=Asia/Shanghai
+            TZ: ${TZ:-Asia/Shanghai}
         ports:
             - 6379:6379
         logging: *default-logging
@@ -198,17 +198,17 @@ services:
                   - redis6
 
     hugo:
-        image: ghcr.io/twbworld/hugo-go-git:latest
+        image: ghcr.io/twbworld/hugo-go-git:${hugo:-latest}
         container_name: hugo
         hostname: docker-hugo
         working_dir: /src/
         command: server -D --i18n-warnings
         restart: always
         environment:
-            - TZ=Asia/Shanghai
-            - HUGO_DESTINATION=public
-            - HUGO_BIND=0.0.0.0
-            - HUGO_ENV=DEV # DEV || production
+            TZ: ${TZ:-Asia/Shanghai}
+            HUGO_DESTINATION: ${HUGO_DESTINATION:-public}
+            HUGO_BIND: ${HUGO_BIND:-0.0.0.0}
+            HUGO_ENV: ${HUGO_ENV:-DEV} # DEV || production
         ports:
             - 1313:1313
         volumes:
@@ -223,13 +223,14 @@ services:
                   - docker-hugo
 
     es:
-        image: elasticsearch:7.10.1
+        image: elasticsearch:${es:-latest}
         container_name: es
         hostname: docker-es
         restart: always
         environment:
-            - ES_JAVA_OPTS=-Xms128m -Xmx512m
-            - discovery.type=single-node
+            TZ: ${TZ:-Asia/Shanghai}
+            ES_JAVA_OPTS:
+            discovery.type:
         ports:
             - 9200:9200
             - 9300:9300
@@ -247,7 +248,7 @@ services:
                   - es7
 
     kibana:
-        image: kibana:7.10.1
+        image: kibana:${kibana:-latest}
         container_name: kibana
         hostname: docker-kibana
         depends_on:
@@ -258,8 +259,8 @@ services:
         volumes:
             - /var/www/es/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
         environment:
-            - TZ=Asia/Shanghai
-            - ELASTICSEARCH_HOSTS=http://es:9200
+            TZ: ${TZ:-Asia/Shanghai}
+            ELASTICSEARCH_HOSTS:
         logging: *default-logging
         networks:
             net1:
@@ -269,14 +270,14 @@ services:
                   - docker-kibana
 
     logstash:
-        image: docker.elastic.co/logstash/logstash:7.11.1
+        image: docker.elastic.co/logstash/logstash:${logstash:-latest}
         container_name: logstash
         hostname: docker-logstash
         depends_on:
             - kibana
         restart: always
         environment:
-            - TZ=Asia/Shanghai
+            TZ: ${TZ:-Asia/Shanghai}
         ports:
             - 5044:5044
         volumes:
