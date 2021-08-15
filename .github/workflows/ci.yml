@@ -69,6 +69,5 @@ jobs:
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
           script: |
-            docker exec nginx /bin/bash -c 'nginx -t && exit'
-            docker restart nginx
+            docker exec nginx /bin/bash -c 'nginx -t && service nginx force-reload && exit'
             exit

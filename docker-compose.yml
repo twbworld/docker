@@ -30,7 +30,7 @@ services:
         depends_on:
           - php
           - mysql
-          - trojan
+          # - trojan
         restart: always
         working_dir: /var/www/html/ #进入容器的默认目录
         environment:
@@ -90,6 +90,8 @@ services:
         image: mysql:${mysql:-latest}
         container_name: mysql
         hostname: docker-mysql
+        depends_on:
+          - mysql
         restart: always
         command: /bin/bash -c "chown -R www-data:www-data /var/lib/mysql /var/run/mysqld &&  mysqld"
         environment: #设置环境变量
@@ -109,31 +111,31 @@ services:
                   - docker-mysql
                   - mysql8
 
-    trojan:
-        image: ghcr.io/twbworld/v2ray-trojan:${trojan:-latest}
-        container_name: trojan
-        hostname: docker-trojan
-        tty: true
-          privileged: true
-          command: /bin/bash -c "/sbin/init"
-        depends_on:
-            - mysql
-        restart: always
-        environment: #设置环境变量
-            TZ: ${TZ:-Asia/Shanghai}
-        volumes:
-            - ${PWD}/../docker/:/root/docker/:rw
-            - /etc/localtime:/etc/localtime:ro
-            - /root/.ssh/id_rsa:/var/www/.ssh/id_rsa:ro #ssh私钥,用于github验证
-            - /root/.ssh/known_hosts:/var/www/.ssh/known_hosts:ro #记录github服务器的白名单
-        logging: *default-logging
-        networks:
-            net1:
-                ipv4_address: 172.1.1.96
-                aliases:
-                  - trojan
-                  - docker-trojan
-                  - trojan-go
+    # trojan:
+    #     image: ghcr.io/twbworld/v2ray-trojan:${trojan:-latest}
+    #     container_name: trojan
+    #     hostname: docker-trojan
+    #     tty: true
+    #     privileged: true
+    #     command: /bin/bash -c "/sbin/init"
+    #     depends_on:
+    #         - mysql
+    #     restart: always
+    #     environment: #设置环境变量
+    #         TZ: ${TZ:-Asia/Shanghai}
+    #     volumes:
+    #         - ${PWD}/../docker/:/root/docker/:rw
+    #         - /etc/localtime:/etc/localtime:ro
+    #         - /root/.ssh/id_rsa:/var/www/.ssh/id_rsa:ro #ssh私钥,用于github验证
+    #         - /root/.ssh/known_hosts:/var/www/.ssh/known_hosts:ro #记录github服务器的白名单
+    #     logging: *default-logging
+    #     networks:
+    #         net1:
+    #             ipv4_address: 172.1.1.96
+    #             aliases:
+    #               - trojan
+    #               - docker-trojan
+    #               - trojan-go
 
     blbl:
         image: superng6/bilibili-helper:${blbl:-latest}
