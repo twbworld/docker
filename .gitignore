@@ -1,16 +1,8 @@
-!.gitignore
-!.gitkeep
-!.htaccess
-
 # ide
 .idea/
 .project/
 .vscode/
 .vs/
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
 *.tmlanguage.cache
 *.tmPreferences.cache
 *.stTheme.cache
@@ -41,7 +33,7 @@ cache/
 temp/
 
 #log
-logs
+logs/*
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -79,4 +71,15 @@ ehthumbs_vista.db
 
 /worktree*/
 
-/data/cert/
+/data/cert/*
+/data/logs/*
+
+
+
+!.gitignore
+!.gitkeep
+!.htaccess
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
