@@ -1,7 +1,3 @@
-!.gitignore
-!.gitkeep
-!.htaccess
-
 # ide
 .idea/
 .project/
@@ -41,7 +37,7 @@ cache/
 temp/
 
 #log
-logs
+logs/*
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -75,6 +71,15 @@ ehthumbs_vista.db
 /bower_components
 .eslintcache
 .env
+
+
+!.gitignore
+!.gitkeep
+!.htaccess
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 
 
 /worktree*/
