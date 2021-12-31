@@ -35,7 +35,7 @@ services:
         working_dir: /var/www/html/ #进入容器的默认目录
         environment:
           TZ: ${TZ:-Asia/Shanghai}
-        ports:
+        ports: #docker是有独立的firewall规则的,即时宿主机对外关闭某个端口,实际上docker的相同端口并不会被作用,除非docker本身规则禁止对外,如 127.0.0.1:80:80
             - 80:80
             - 443:443
         volumes:
@@ -72,9 +72,6 @@ services:
         working_dir: /var/www/html/ #进入容器的默认目录
         environment:
             TZ: ${TZ:-Asia/Shanghai}
-        ports:
-            - 9000:9000
-            - 9501:9501
         volumes:
             - ${PWD}/../thinkPHP5.1-admin/:/var/www/html/tp/:rw #运行目录
             - ${PWD}/../../vue/dist/:/var/www/html/vue/:rw #运行目录
@@ -134,7 +131,7 @@ services:
             MYSQL_PASSWORD:
             # MYSQL_DATABASE:
         ports:
-            - 3306:3306
+            - 127.0.0.1:3306:3306
         volumes:
             - ${PWD}/../thinkPHP5.1-admin/docs/tp.sql:/docker-entrypoint-initdb.d/tp.sql:ro #把sql放在docker-entrypoint-initdb.d下,mysql会自动执行
             - ${PWD}/../phalcon_shop/docs/panda36_all.sql:/docker-entrypoint-initdb.d/panda36_all.sql:ro
@@ -158,8 +155,6 @@ services:
             - mysql
         command: /bin/bash -c "chown -R www-data:www-data /var/lib/mysql /var/run/mysqld &&  mysqld"
         restart: always
-        ports:
-            - 3307:3306
         volumes:
             - ${PWD}/../../erp/yanming.sql:/docker-entrypoint-initdb.d/yanming.sql:ro #把sql放在docker-entrypoint-initdb.d下,mysql会自动执行
             - /usr/local/mysql5-docker/data/:/var/lib/mysql/:rw #库数据,一旦使用,设置的环境变量和自动执行sql功能则失效
@@ -186,8 +181,6 @@ services:
         restart: always
         environment:
             TZ: ${TZ:-Asia/Shanghai}
-        ports:
-            - 6379:6379
         logging: *default-logging
         networks:
             net1:
