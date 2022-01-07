@@ -168,17 +168,17 @@ services:
                sed -i "s/crond/#crond/" docker/docker-entrypoint.sh
                ./docker/docker-entrypoint.sh
                echo "{\"username\":\"${QL_USERNAME:-root}\",\"password\":\"${QL_PASSWORD:-root}\",\"token\":\"${QL_TOKEN}\"}" > /ql/config/auth.json
-               sleep 1s
+               sleep 3s
                ql repo https://github.com/zero205/JD_tencent_scf.git "jd_|jx_|getJDCookie" "backUp|icon" "^jd[^_]|USER|sendNotify|sign_graphics_validate|JDJR|JDSign" "main"
                crond -f >/dev/null
         restart: always
         environment:
-            - TZ=${TZ:-Asia/Shanghai}
-            - JD_COOKIE=${JD_COOKIE}
-            - JD_JOIN_ZLC=${JD_JOIN_ZLC:-false}
-            - JD_USER_AGENT=${JD_USER_AGENT}
-            - TG_BOT_TOKEN=${TG_BOT_TOKEN}
-            - TG_USER_ID=${TG_USER_ID}
+            TZ: ${TZ:-Asia/Shanghai}
+            JD_COOKIE:
+            JD_JOIN_ZLC: ${JD_JOIN_ZLC:-false}
+            JD_USER_AGENT:
+            TG_BOT_TOKEN:
+            TG_USER_ID:
         volumes:
             - /root/.ssh/id_rsa:/var/www/.ssh/id_rsa:ro #ssh私钥,用于github验证
             - /root/.ssh/known_hosts:/var/www/.ssh/known_hosts:ro #记录github服务器的白名单
