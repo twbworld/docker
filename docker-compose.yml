@@ -179,6 +179,22 @@ services:
             JD_USER_AGENT:
             TG_BOT_TOKEN:
             TG_USER_ID:
+            PETSHARECODES: #东东萌宠互助码
+            PLANT_BEAN_SHARECODES: #种豆得豆互助码
+            DDFACTORY_SHARECODES: #东东工厂互助码
+            JDSGMH_SHARECODES: #闪购盲盒互助码
+            JDCFD_SHARECODES: #京喜财富岛互助码
+            FRUITSHARECODES: #东东农场互助码
+            JD_CASH_SHARECODES: #签到领现金互助码
+            DREAM_FACTORY_SHARE_CODES: #京喜工厂互助码
+            JDZZ_SHARECODES: #京东赚赚互助码
+            JDJOY_SHARECODES: #疯狂的JOY互助码
+            BOOKSHOP_SHARECODES: #京东书店互助码
+            JD_CASH_SHARECODES: #签到领现金互助码
+            JXNC_SHARECODES: #京喜农场互助码
+            dyjCode: #大赢家互助码
+            TYT_PACKETID: #推一推互助码
+            MONEYTREE_SHARECODES: #摇钱树互助码
         volumes:
             - /root/.ssh/id_rsa:/var/www/.ssh/id_rsa:ro #ssh私钥,用于github验证
             - /root/.ssh/known_hosts:/var/www/.ssh/known_hosts:ro #记录github服务器的白名单
