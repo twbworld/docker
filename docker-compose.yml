@@ -170,10 +170,18 @@ services:
                echo "{\"username\":\"${QL_USERNAME:-root}\",\"password\":\"${QL_PASSWORD:-root}\",\"token\":\"${QL_TOKEN}\"}" > /ql/config/auth.json
                sleep 3s
                ql repo https://github.com/zero205/JD_tencent_scf.git "jd_|jx_|getJDCookie" "backUp|icon" "^jd[^_]|USER|sendNotify|sign_graphics_validate|JDJR|JDSign" "main"
+               ql repo https://github.com/twbworld/NeteaseCloudMusicTasks.git "index.py" "" "py" "main"
+               cp /ql/repo/twbworld_NeteaseCloudMusicTasks_main/config.json /ql/scripts/twbworld_NeteaseCloudMusicTasks_main/
+               apk --no-cache add -f bash pip
+               pip install -r /ql/repo/twbworld_NeteaseCloudMusicTasks_main/requirements.txt
                crond -f >/dev/null
         restart: always
         environment:
             TZ: ${TZ:-Asia/Shanghai}
+            USERNAME_163:
+            PASSWORD_163:
+            IP_163:
+            TG_BOT_TOKEN_163:
             JD_COOKIE:
             JD_JOIN_ZLC: ${JD_JOIN_ZLC:-false}
             JD_USER_AGENT:
