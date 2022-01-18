@@ -174,8 +174,8 @@ services:
                echo "export TG_USER_ID=\"${TG_USER_ID}\"" >> /ql/config/env.sh
                ql repo https://github.com/twbworld/NeteaseCloudMusicTasks.git "index.py" "" "py" "main"
                cp /ql/repo/twbworld_NeteaseCloudMusicTasks_main/config.json /ql/scripts/twbworld_NeteaseCloudMusicTasks_main/
-               apk --no-cache add -f bash pip
-               pip install -r /ql/repo/twbworld_NeteaseCloudMusicTasks_main/requirements.txt
+               apk --no-cache add -f bash pip g++
+               pip install -r /ql/repo/twbworld_NeteaseCloudMusicTasks_main/requirements.txt --no-cache-dir
                crond -f >/dev/null
         restart: always
         environment:
