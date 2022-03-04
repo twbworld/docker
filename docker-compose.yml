@@ -222,3 +222,26 @@ services:
                 aliases:
                   - qinglong
                   - docker-qinglong
+
+    oneindex:
+        image: setzero/oneindex:${oneindex:-latest}
+        container_name: oneindex
+        hostname: docker-oneindex
+        restart: always
+        working_dir: /var/www/html/
+        environment:
+            TZ: ${TZ:-Asia/Shanghai}
+            REFRESH_TOKEN: "0 * * * *"
+            REFRESH_CACHE: "*/10 * * * *"
+            PASSWORD: ${ONEINDEX_PASSWORD:-oneindex}
+            CLIENT_SECRET: ${ONEINDEX_CLIENT_SECRET}
+            CLIENT_ID: ${ONEINDEX_CLIENT_ID}
+            REFRESH_TOKEN_CODE: ${ONEINDEX_REFRESH_TOKEN}
+        volumes:
+            - ${PWD}/conf/oneindex/base.php:/var/www/html/config/base.php:rw
+        logging: *default-logging
+        networks:
+          net1:
+              ipv4_address: 172.1.1.90
+              aliases:
+                - docker-oneindex
