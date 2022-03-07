@@ -30,6 +30,8 @@ services:
     #     depends_on:
     #       - php
     #       - mysql
+    #       - qinglong
+    #       - oneindex
     #       # - trojan
     #     restart: always
     #     working_dir: /var/www/html/ #进入容器的默认目录
@@ -223,25 +225,55 @@ services:
     #               - qinglong
     #               - docker-qinglong
 
-    oneindex:
-        image: setzero/oneindex:${oneindex:-latest}
-        container_name: oneindex
-        hostname: docker-oneindex
+    # oneindex:
+    #     image: setzero/oneindex:${oneindex:-latest}
+    #     container_name: oneindex
+    #     hostname: docker-oneindex
+    #     restart: always
+    #     working_dir: /var/www/html/
+    #     environment:
+    #         TZ: ${TZ:-Asia/Shanghai}
+    #         REFRESH_TOKEN: "0 * * * *"
+    #         REFRESH_CACHE: "*/10 * * * *"
+    #         PASSWORD: ${ONEINDEX_PASSWORD:-oneindex}
+    #         CLIENT_SECRET: ${ONEINDEX_CLIENT_SECRET}
+    #         CLIENT_ID: ${ONEINDEX_CLIENT_ID}
+    #         REFRESH_TOKEN_CODE: ${ONEINDEX_REFRESH_TOKEN}
+    #     volumes:
+    #         - ${PWD}/data/tmp/oneindex/config/:/var/www/html/config/:rw
+    #     logging: *default-logging
+    #     networks:
+    #       net1:
+    #           ipv4_address: 172.1.1.88
+    #           aliases:
+    #             - docker-oneindex
+
+    jd:
+        image: python:${python:-latest}
+        container_name: jd
+        hostname: docker-jd
         restart: always
-        working_dir: /var/www/html/
+        working_dir: /var
+        command:
+            - /bin/bash
+            - -c
+            - |
+                curl -LO https://github.com/louisyoungx/JD-SHOPPER/archive/refs/heads/master.tar.gz
+                tar -xzf master.tar.gz
+                rm -f master.tar.gz
+                mv JD-SHOPPER-master /var/jd
+                cd /var/jd
+                pip install requests lxml bs4
+                rm -f /var/jd/Config/config.ini
+                ln -s /config.ini /var/jd/Config/config.ini
+                python3 runserver.py
         environment:
             TZ: ${TZ:-Asia/Shanghai}
-            REFRESH_TOKEN: "0 * * * *"
-            REFRESH_CACHE: "*/10 * * * *"
-            PASSWORD: ${ONEINDEX_PASSWORD:-oneindex}
-            CLIENT_SECRET: ${ONEINDEX_CLIENT_SECRET}
-            CLIENT_ID: ${ONEINDEX_CLIENT_ID}
-            REFRESH_TOKEN_CODE: ${ONEINDEX_REFRESH_TOKEN}
         volumes:
-            - ${PWD}/data/tmp/oneindex/config/:/var/www/html/config/:rw
+            - ${PWD}/data/tmp/jd/config.ini:/config.ini:rw
         logging: *default-logging
         networks:
           net1:
-              ipv4_address: 172.1.1.88
+              ipv4_address: 172.1.1.87
               aliases:
-                - docker-oneindex
+                - docker-jd
