@@ -73,6 +73,7 @@ ehthumbs_vista.db
 
 /data/cert/*
 /data/logs/*
+/data/tmp/*
 
 
 
