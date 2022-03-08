@@ -72,8 +72,8 @@ services:
     #         - ${PWD}/../../html/:/var/www/html/:rw
     #         - ${PWD}/conf/php/php.ini:/usr/local/etc/php/php.ini:ro #php配置
     #         - ${PWD}/conf/php/www.conf:/usr/local/etc/php-fpm.d/www.conf:ro #php配置
-    #         - /root/.ssh/id_rsa:/var/www/.ssh/id_rsa:ro #ssh私钥,用于github验证
-    #         - /root/.ssh/known_hosts:/var/www/.ssh/known_hosts:ro #记录github服务器的白名单
+    #         - /root/.ssh/id_rsa:/root/.ssh/id_rsa:ro #ssh私钥,用于github验证
+    #         - /root/.ssh/known_hosts:/root/.ssh/known_hosts:ro #记录github服务器的白名单
     #         - ${PWD}/data/logs/php/:/var/www/logs/:rw #日志
     #     logging: *default-logging
     #     networks:
@@ -118,8 +118,8 @@ services:
     #     volumes:
     #         - ${PWD}/../docker/:/root/docker/:rw
     #         - /etc/localtime:/etc/localtime:ro
-    #         - /root/.ssh/id_rsa:/var/www/.ssh/id_rsa:ro #ssh私钥,用于github验证
-    #         - /root/.ssh/known_hosts:/var/www/.ssh/known_hosts:ro #记录github服务器的白名单
+    #         - /root/.ssh/id_rsa:/root/.ssh/id_rsa:ro #ssh私钥,用于github验证
+    #         - /root/.ssh/known_hosts:/root/.ssh/known_hosts:ro #记录github服务器的白名单
     #     logging: *default-logging
     #     networks:
     #         net1:
@@ -215,8 +215,8 @@ services:
     #         JRBODY: #jd_bean_sign.js金融APP签到(需要cookie)
     #         DPQDTK: #店铺签到token
     #     volumes:
-    #         - /root/.ssh/id_rsa:/var/www/.ssh/id_rsa:ro #ssh私钥,用于github验证
-    #         - /root/.ssh/known_hosts:/var/www/.ssh/known_hosts:ro #记录github服务器的白名单
+    #         - /root/.ssh/id_rsa:/root/.ssh/id_rsa:ro #ssh私钥,用于github验证
+    #         - /root/.ssh/known_hosts:/root/.ssh/known_hosts:ro #记录github服务器的白名单
     #     logging: *default-logging
     #     networks:
     #         net1:
@@ -263,7 +263,8 @@ services:
                 rm -f master.tar.gz
                 mv JD-SHOPPER-master /var/jd
                 cd /var/jd
-                pip install requests lxml bs4
+                python -m pip install --upgrade pip
+                pip install -r requirements.txt
                 rm -f /var/jd/Config/config.ini
                 ln -s /config.ini /var/jd/Config/config.ini
                 python3 runserver.py
@@ -271,6 +272,7 @@ services:
             TZ: ${TZ:-Asia/Shanghai}
         volumes:
             - ${PWD}/data/tmp/jd/config.ini:/config.ini:rw
+            - /etc/localtime:/etc/localtime:ro
         logging: *default-logging
         networks:
           net1:
