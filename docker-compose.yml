@@ -166,14 +166,15 @@ services:
         entrypoint:
               - /bin/bash
               - -c
-              - |
+              - | #环境变量失效请执行: source /ql/data/config/env.sh
                sed -i "s/crond/#crond/" docker/docker-entrypoint.sh
+               echo "{\"username\":\"${QL_USERNAME:-root}\",\"password\":\"${QL_PASSWORD:-root}\",\"token\":\"${QL_TOKEN}\",\"retries\":0,\"twoFactorActivated\":false,\"twoFactorActived\":false}" > /ql/sample/auth.sample.json
                ./docker/docker-entrypoint.sh
-               echo "{\"username\":\"${QL_USERNAME:-root}\",\"password\":\"${QL_PASSWORD:-root}\",\"token\":\"${QL_TOKEN}\"}" > /ql/config/auth.json
                sleep 3s
+               echo "export TG_BOT_TOKEN=\"${JD_TG_BOT_TOKEN}\"" >> /ql/data/config/env.sh
+               echo "export TG_USER_ID=\"${TG_CHAT_ID}\"" >> /ql/data/config/env.sh
+               source /ql/data/config/env.sh
                ql repo https://github.com/zero205/JD_tencent_scf.git "jd_|jx_|getJDCookie" "backUp|icon" "^jd[^_]|USER|sendNotify|sign_graphics_validate|JDJR|JDSign" "main"
-               echo "export TG_BOT_TOKEN=\"${JD_TG_BOT_TOKEN}\"" >> /ql/config/env.sh
-               echo "export TG_USER_ID=\"${TG_CHAT_ID}\"" >> /ql/config/env.sh
                ql repo https://github.com/twbworld/NeteaseCloudMusicTasks.git "index.py" "" "py" "main"
                cp /ql/repo/twbworld_NeteaseCloudMusicTasks_main/config.json /ql/scripts/twbworld_NeteaseCloudMusicTasks_main/
                apk --no-cache add -f bash pip g++
@@ -187,12 +188,14 @@ services:
             PASSWORD_163: ${163_PASSWORD}
             IP_163: ${163_IP}
             TG_BOT_TOKEN_163: ${163_TG_BOT_TOKEN}
+            TG_BOT_TOKEN: ${JD_TG_BOT_TOKEN} #已交由entrypoint处理
             JD_COOKIE:
             JD_JOIN_ZLC: ${JD_JOIN_ZLC:-false} #是否加入互助
             JD_USER_AGENT:
-            TG_BOT_TOKEN: ${JD_TG_BOT_TOKEN} #已交由entrypoint处理
             gua_cleancart_Run: ${gua_cleancart_Run:-true} #柠檬赚金币
             JD_TRY: ${JD_TRY:-true} #京东试用
+            XFXD: ${XFXD:-true}
+            cfd_rp: ${cfd_rp:-true}
             FS_LEVEL: ${FS_LEVEL:-car} #电脑配件
             MARKET_COIN_TO_BEANS: ${MARKET_COIN_TO_BEANS:-100} #东东超市兑换奖品
             PETSHARECODES: #东东萌宠互助码
