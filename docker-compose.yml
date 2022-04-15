@@ -175,11 +175,11 @@ services:
                echo "export TG_USER_ID=\"${TG_CHAT_ID}\"" >> /ql/data/config/env.sh
                source /ql/data/config/env.sh
                ql repo https://github.com/zero205/JD_tencent_scf.git "jd_|jx_|getJDCookie" "backUp|icon" "^jd[^_]|USER|sendNotify|sign_graphics_validate|JDJR|JDSign" "main"
-               ql repo https://github.com/twbworld/NeteaseCloudMusicTasks.git "index.py" "" "py" "main"
-               cp /ql/repo/twbworld_NeteaseCloudMusicTasks_main/config.json /ql/scripts/twbworld_NeteaseCloudMusicTasks_main/
-               apk --no-cache add -f bash pip g++
-               pip install -r /ql/repo/twbworld_NeteaseCloudMusicTasks_main/requirements.txt --no-cache-dir
                crond -f >/dev/null
+            # ql repo https://github.com/twbworld/NeteaseCloudMusicTasks.git "index.py" "" "py" "main"
+            # cp /ql/repo/twbworld_NeteaseCloudMusicTasks_main/config.json /ql/scripts/twbworld_NeteaseCloudMusicTasks_main/
+            # apk --no-cache add -f bash pip g++
+            # pip install -r /ql/repo/twbworld_NeteaseCloudMusicTasks_main/requirements.txt --no-cache-dir
         restart: always
         environment:
             TZ: ${TZ:-Asia/Shanghai}
