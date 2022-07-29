@@ -159,74 +159,74 @@ services:
     #             - docker-blbl
 
 
-    qinglong:
-        image: whyour/qinglong
-        container_name: qinglong
-        hostname: docker-qinglong
-        entrypoint:
-              - /bin/bash
-              - -c
-              - | #环境变量失效请执行: source /ql/data/config/env.sh
-               sed -i "s/crond/#crond/" docker/docker-entrypoint.sh
-               echo "{\"username\":\"${QL_USERNAME:-root}\",\"password\":\"${QL_PASSWORD:-root}\",\"token\":\"${QL_TOKEN}\",\"retries\":0,\"twoFactorActivated\":false,\"twoFactorActived\":false}" > /ql/sample/auth.sample.json
-               ./docker/docker-entrypoint.sh
-               sleep 3s
-               echo "export TG_BOT_TOKEN=\"${JD_TG_BOT_TOKEN}\"" >> /ql/data/config/env.sh
-               echo "export TG_USER_ID=\"${TG_CHAT_ID}\"" >> /ql/data/config/env.sh
-               source /ql/data/config/env.sh
-               ql repo https://github.com/zero205/JD_tencent_scf.git "jd_|jx_|getJDCookie" "backUp|icon" "^jd[^_]|USER|sendNotify|sign_graphics_validate|JDJR|JDSign" "main"
-               crond -f >/dev/null
-            # ql repo https://github.com/twbworld/NeteaseCloudMusicTasks.git "index.py" "" "py" "main"
-            # cp /ql/repo/twbworld_NeteaseCloudMusicTasks_main/config.json /ql/scripts/twbworld_NeteaseCloudMusicTasks_main/
-            # apk --no-cache add -f bash pip g++
-            # pip install -r /ql/repo/twbworld_NeteaseCloudMusicTasks_main/requirements.txt --no-cache-dir
-        restart: always
-        environment:
-            TZ: ${TZ:-Asia/Shanghai}
-            TG_USER_ID: ${TG_CHAT_ID} #已交由entrypoint处理
-            USERNAME_163: ${163_USERNAME}
-            PASSWORD_163: ${163_PASSWORD}
-            IP_163: ${163_IP}
-            TG_BOT_TOKEN_163: ${163_TG_BOT_TOKEN}
-            TG_BOT_TOKEN: ${JD_TG_BOT_TOKEN} #已交由entrypoint处理
-            JD_COOKIE:
-            JD_JOIN_ZLC: ${JD_JOIN_ZLC:-false} #是否加入互助
-            JD_USER_AGENT:
-            gua_cleancart_Run: ${gua_cleancart_Run:-true} #柠檬赚金币
-            JD_TRY: ${JD_TRY:-true} #京东试用
-            XFXD: ${XFXD:-true}
-            cfd_rp: ${cfd_rp:-true}
-            FS_LEVEL: ${FS_LEVEL:-car} #电脑配件
-            MARKET_COIN_TO_BEANS: ${MARKET_COIN_TO_BEANS:-100} #东东超市兑换奖品
-            PETSHARECODES: #东东萌宠互助码
-            PLANT_BEAN_SHARECODES: #种豆得豆互助码
-            DDFACTORY_SHARECODES: #东东工厂互助码
-            JDSGMH_SHARECODES: #闪购盲盒互助码
-            JDCFD_SHARECODES: #京喜财富岛互助码
-            FRUITSHARECODES: #东东农场互助码
-            JD_CASH_SHARECODES: #签到领现金互助码
-            DREAM_FACTORY_SHARE_CODES: #京喜工厂互助码
-            JDZZ_SHARECODES: #京东赚赚互助码
-            JDJOY_SHARECODES: #疯狂的JOY互助码
-            BOOKSHOP_SHARECODES: #京东书店互助码
-            JXNC_SHARECODES: #京喜农场互助码
-            dyjCode: #大赢家互助码
-            TYT_PACKETID: #推一推互助码
-            MONEYTREE_SHARECODES: #摇钱树互助码
-            InviterPin: #柠檬赚金币邀请码
-            SEVENDAY_LIST: #7天店铺签到
-            JRBODY: #jd_bean_sign.js金融APP签到(需要cookie)
-            DPQDTK: #店铺签到token
-        volumes:
-            - /root/.ssh/id_rsa:/root/.ssh/id_rsa:ro #ssh私钥,用于github验证
-            - /root/.ssh/known_hosts:/root/.ssh/known_hosts:ro #记录github服务器的白名单
-        logging: *default-logging
-        networks:
-            net1:
-                ipv4_address: 172.1.1.89
-                aliases:
-                  - qinglong
-                  - docker-qinglong
+    # qinglong:
+    #     image: whyour/qinglong
+    #     container_name: qinglong
+    #     hostname: docker-qinglong
+    #     entrypoint:
+    #           - /bin/bash
+    #           - -c
+    #           - | #环境变量失效请执行: source /ql/data/config/env.sh
+    #            sed -i "s/crond/#crond/" docker/docker-entrypoint.sh
+    #            echo "{\"username\":\"${QL_USERNAME:-root}\",\"password\":\"${QL_PASSWORD:-root}\",\"token\":\"${QL_TOKEN}\",\"retries\":0,\"twoFactorActivated\":false,\"twoFactorActived\":false}" > /ql/sample/auth.sample.json
+    #            ./docker/docker-entrypoint.sh
+    #            sleep 3s
+    #            echo "export TG_BOT_TOKEN=\"${JD_TG_BOT_TOKEN}\"" >> /ql/data/config/env.sh
+    #            echo "export TG_USER_ID=\"${TG_CHAT_ID}\"" >> /ql/data/config/env.sh
+    #            source /ql/data/config/env.sh
+    #            ql repo https://github.com/zero205/JD_tencent_scf.git "jd_|jx_|getJDCookie" "backUp|icon" "^jd[^_]|USER|sendNotify|sign_graphics_validate|JDJR|JDSign" "main"
+    #            crond -f >/dev/null
+    #         # ql repo https://github.com/twbworld/NeteaseCloudMusicTasks.git "index.py" "" "py" "main"
+    #         # cp /ql/repo/twbworld_NeteaseCloudMusicTasks_main/config.json /ql/scripts/twbworld_NeteaseCloudMusicTasks_main/
+    #         # apk --no-cache add -f bash pip g++
+    #         # pip install -r /ql/repo/twbworld_NeteaseCloudMusicTasks_main/requirements.txt --no-cache-dir
+    #     restart: always
+    #     environment:
+    #         TZ: ${TZ:-Asia/Shanghai}
+    #         TG_USER_ID: ${TG_CHAT_ID} #已交由entrypoint处理
+    #         USERNAME_163: ${163_USERNAME}
+    #         PASSWORD_163: ${163_PASSWORD}
+    #         IP_163: ${163_IP}
+    #         TG_BOT_TOKEN_163: ${163_TG_BOT_TOKEN}
+    #         TG_BOT_TOKEN: ${JD_TG_BOT_TOKEN} #已交由entrypoint处理
+    #         JD_COOKIE:
+    #         JD_JOIN_ZLC: ${JD_JOIN_ZLC:-false} #是否加入互助
+    #         JD_USER_AGENT:
+    #         gua_cleancart_Run: ${gua_cleancart_Run:-true} #柠檬赚金币
+    #         JD_TRY: ${JD_TRY:-true} #京东试用
+    #         XFXD: ${XFXD:-true}
+    #         cfd_rp: ${cfd_rp:-true}
+    #         FS_LEVEL: ${FS_LEVEL:-car} #电脑配件
+    #         MARKET_COIN_TO_BEANS: ${MARKET_COIN_TO_BEANS:-100} #东东超市兑换奖品
+    #         PETSHARECODES: #东东萌宠互助码
+    #         PLANT_BEAN_SHARECODES: #种豆得豆互助码
+    #         DDFACTORY_SHARECODES: #东东工厂互助码
+    #         JDSGMH_SHARECODES: #闪购盲盒互助码
+    #         JDCFD_SHARECODES: #京喜财富岛互助码
+    #         FRUITSHARECODES: #东东农场互助码
+    #         JD_CASH_SHARECODES: #签到领现金互助码
+    #         DREAM_FACTORY_SHARE_CODES: #京喜工厂互助码
+    #         JDZZ_SHARECODES: #京东赚赚互助码
+    #         JDJOY_SHARECODES: #疯狂的JOY互助码
+    #         BOOKSHOP_SHARECODES: #京东书店互助码
+    #         JXNC_SHARECODES: #京喜农场互助码
+    #         dyjCode: #大赢家互助码
+    #         TYT_PACKETID: #推一推互助码
+    #         MONEYTREE_SHARECODES: #摇钱树互助码
+    #         InviterPin: #柠檬赚金币邀请码
+    #         SEVENDAY_LIST: #7天店铺签到
+    #         JRBODY: #jd_bean_sign.js金融APP签到(需要cookie)
+    #         DPQDTK: #店铺签到token
+    #     volumes:
+    #         - /root/.ssh/id_rsa:/root/.ssh/id_rsa:ro #ssh私钥,用于github验证
+    #         - /root/.ssh/known_hosts:/root/.ssh/known_hosts:ro #记录github服务器的白名单
+    #     logging: *default-logging
+    #     networks:
+    #         net1:
+    #             ipv4_address: 172.1.1.89
+    #             aliases:
+    #               - qinglong
+    #               - docker-qinglong
 
     # oneindex:
     #     image: setzero/oneindex:${oneindex:-latest}
