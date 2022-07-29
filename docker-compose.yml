@@ -184,10 +184,10 @@ services:
     #     environment:
     #         TZ: ${TZ:-Asia/Shanghai}
     #         TG_USER_ID: ${TG_CHAT_ID} #已交由entrypoint处理
-    #         USERNAME_163: ${163_USERNAME}
-    #         PASSWORD_163: ${163_PASSWORD}
-    #         IP_163: ${163_IP}
-    #         TG_BOT_TOKEN_163: ${163_TG_BOT_TOKEN}
+    #         USERNAME_163: ${USERNAME_163}
+    #         PASSWORD_163: ${PASSWORD_163}
+    #         IP_163: ${IP_163}
+    #         TG_BOT_TOKEN_163: ${TG_BOT_TOKEN_163}
     #         TG_BOT_TOKEN: ${JD_TG_BOT_TOKEN} #已交由entrypoint处理
     #         JD_COOKIE:
     #         JD_JOIN_ZLC: ${JD_JOIN_ZLC:-false} #是否加入互助
@@ -228,6 +228,7 @@ services:
     #               - qinglong
     #               - docker-qinglong
 
+    #安装的时候需要到"Microsoft Azure""应用注册""身份认证"配置重定向的地址,否则会提示uri错误
     # oneindex:
     #     image: setzero/oneindex:${oneindex:-latest}
     #     container_name: oneindex
@@ -261,7 +262,7 @@ services:
     #         - /bin/bash
     #         - -c
     #         - |
-    #             curl -LO https://github.com/louisyoungx/JD-SHOPPER/archive/refs/heads/master.tar.gz
+    #             curl -LO https://github.com/twbworld/JD-SHOPPER/archive/refs/heads/master.tar.gz
     #             tar -xzf master.tar.gz
     #             rm -f master.tar.gz
     #             mv JD-SHOPPER-master /var/jd
