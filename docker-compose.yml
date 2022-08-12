@@ -11,9 +11,9 @@ networks:
                 - subnet: 172.1.1.0/24 #指定ip段
 
 #创建卷
-# volumes:
-#     logs_volume:
-#         name: logs_volume_name #在宿主机的目录名
+volumes:
+    logs_volume:
+        name: logs_volume_name #在宿主机的目录名
 
 # 定义日志模板
 x-logging: &default-logging
@@ -30,8 +30,7 @@ services:
     #     depends_on:
     #       - php
     #       - mysql
-    #       - qinglong
-    #       - oneindex
+    #       # - qinglong
     #       # - trojan
     #     restart: always
     #     working_dir: /var/www/html/ #进入容器的默认目录
@@ -228,29 +227,6 @@ services:
     #               - qinglong
     #               - docker-qinglong
 
-    #安装的时候需要到"Microsoft Azure""应用注册""身份认证"配置重定向的地址,否则会提示uri错误
-    # oneindex:
-    #     image: setzero/oneindex:${oneindex:-latest}
-    #     container_name: oneindex
-    #     hostname: docker-oneindex
-    #     restart: always
-    #     working_dir: /var/www/html/
-    #     environment:
-    #         TZ: ${TZ:-Asia/Shanghai}
-    #         REFRESH_TOKEN: "0 * * * *"
-    #         REFRESH_CACHE: "*/10 * * * *"
-    #         PASSWORD: ${ONEINDEX_PASSWORD:-oneindex}
-    #         CLIENT_SECRET: ${ONEINDEX_CLIENT_SECRET}
-    #         CLIENT_ID: ${ONEINDEX_CLIENT_ID}
-    #         REFRESH_TOKEN_CODE: ${ONEINDEX_REFRESH_TOKEN}
-    #     volumes:
-    #         - ${PWD}/data/tmp/oneindex/config/:/var/www/html/config/:rw
-    #     logging: *default-logging
-    #     networks:
-    #       net1:
-    #           ipv4_address: 172.1.1.88
-    #           aliases:
-    #             - docker-oneindex
 
     # jd:
     #     image: python:${python:-latest}
