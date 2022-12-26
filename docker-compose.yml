@@ -23,15 +23,15 @@ x-logging: &default-logging
         max-file: "10"
 
 services:
-    # nginx:
+    nginx:
         image: nginx:${nginx:-latest}
         container_name: nginx
         hostname: docker-nginx
-        depends_on:
-          - php
-          - mysql
-          # - qinglong
-          # - trojan
+        # depends_on:
+        #   - php
+        #   - mysql
+        #   - qinglong
+        #   - trojan
         restart: always
         # user: www-data
         working_dir: /var/www/html/ #进入容器的默认目录
