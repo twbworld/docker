@@ -8,7 +8,7 @@ networks:
         ipam:
             driver: default
             config:
-                - subnet: 172.1.1.0/24 #指定ip段
+                - subnet: 172.1.1.0/24 #指定ip段(防火墙需设置白名单避免将此认作外网ip进行拦截,导致容器无法访问宿主机: "ufw allow from 172.1.0.0/16")
 
 #创建卷
 volumes:
@@ -47,9 +47,10 @@ services:
             - 2096:443
             - 8443:443
         volumes:
+            - ${PWD}/../../html/:/var/www/html/:rw
             - ${PWD}/conf/nginx/nginx.conf:/etc/nginx/nginx.conf:ro #nginx根配置
             - ${PWD}/conf/nginx/conf.d/:/etc/nginx/conf.d/:ro #nginx配置
-            - ${PWD}/../../html/:/var/www/html/:rw
+            - ${PWD}/conf/nginx/404.html:/usr/share/nginx/html/404.html:ro
             - ${PWD}/../docker/:/root/docker/:ro
             - ${PWD}/data/logs/nginx/:/var/www/logs/:rw #日志
         logging: *default-logging

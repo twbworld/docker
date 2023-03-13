@@ -21,7 +21,7 @@ jobs:
     env:
       TZ: Asia/Shanghai
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       # 运行Codacy,可使用.codacy.yml配置
       - name: Codacy
         uses: codacy/codacy-analysis-cli-action@master
