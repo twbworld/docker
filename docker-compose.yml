@@ -58,7 +58,6 @@ services:
         deploy:
             resources:
                 limits:
-                    cpus: 1
                     memory: 256M
                 reservations:
                     memory: 8M
@@ -94,7 +93,7 @@ services:
         deploy:
             resources:
                 limits:
-                    cpus: 0.5
+                    cpus: 1.5
                     memory: 512M
                 reservations:
                     memory: 16M
@@ -108,6 +107,8 @@ services:
         image: golang:${golang:-latest}
         container_name: go
         hostname: docker-go
+        depends_on:
+            - mysql
         command: /bin/bash -c "go build -o server main.go && ./server"
         restart: always
         working_dir: /var/www/html/proxy/ #进入容器的默认目录
@@ -120,6 +121,12 @@ services:
             - ${PWD}/../proxy/:/var/www/html/proxy/:rw #运行目录
             - ${PWD}/data/logs/go/:/var/www/html/proxy/log/:rw #日志
         logging: *default-logging
+        deploy:
+            resources:
+                limits:
+                    memory: 256M
+                reservations:
+                    memory: 16M
         networks:
             net1:
                 ipv4_address: 172.1.1.88
@@ -146,7 +153,7 @@ services:
         deploy:
             resources:
                 limits:
-                    cpus: 1
+                    cpus: 1.5
                     memory: 1024M
                 reservations:
                     memory: 64M
@@ -177,7 +184,6 @@ services:
         deploy:
             resources:
                 limits:
-                    cpus: 1.5
                     memory: 512M
                 reservations:
                     memory: 16M
@@ -269,7 +275,7 @@ services:
         deploy:
             resources:
                 limits:
-                    cpus: 0.5
+                    cpus: 1
                     memory: 1024M
         networks:
             net1:
@@ -307,7 +313,7 @@ services:
         deploy:
             resources:
                 limits:
-                    cpus: 0.5
+                    cpus: 1
                     memory: 516M
         networks:
           net1:
