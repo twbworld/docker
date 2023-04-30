@@ -29,6 +29,7 @@ services:
         hostname: docker-nginx
         depends_on:
           - php
+          - go
           - mysql
           - qinglong
           - trojan
@@ -102,6 +103,30 @@ services:
                 ipv4_address: 172.1.1.98
                 aliases:
                   - docker-php
+
+    go:
+        image: golang:${golang:-latest}
+        container_name: go
+        hostname: docker-go
+        command: /bin/bash -c "go build -o server main.go && ./server"
+        restart: always
+        working_dir: /var/www/html/proxy/ #进入容器的默认目录
+        environment:
+          TZ: ${TZ:-Asia/Shanghai}
+          GO111MODULE: "on"
+          GOPATH: "/go"
+        volumes:
+            - ${GOPATH:-/root/go}/pkg/:/go/pkg/:rw
+            - ${PWD}/../proxy/:/var/www/html/proxy/:rw #运行目录
+            - ${PWD}/data/logs/go/:/var/www/html/proxy/log/:rw #日志
+        logging: *default-logging
+        networks:
+            net1:
+                ipv4_address: 172.1.1.88
+                aliases:
+                  - go
+                  - golang
+                  - docker-go
 
     mysql:
         image: mysql:${mysql:-latest}
