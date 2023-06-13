@@ -18,17 +18,17 @@ on:
 jobs:
 
   cd:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     env:
       TZ: Asia/Shanghai
     steps:
       - name: pull-repo
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
+          host: ${{ vars.HOST }}
+          username: ${{ vars.USERNAME }}
           key: ${{ secrets.KEY }}
-          port: ${{ secrets.PORT }}
+          port: ${{ vars.PORT }}
           script: |
             cd /var/www/html/docker/
             git checkout -- .
@@ -40,10 +40,10 @@ jobs:
       - name: restart-nginx
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
+          host: ${{ vars.HOST }}
+          username: ${{ vars.USERNAME }}
           key: ${{ secrets.KEY }}
-          port: ${{ secrets.PORT }}
+          port: ${{ vars.PORT }}
           script: |
             docker exec nginx /bin/bash -c 'nginx -t && service nginx force-reload && exit'
             exit
