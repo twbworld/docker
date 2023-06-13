@@ -109,7 +109,7 @@ services:
         hostname: docker-go
         depends_on:
             - mysql
-        command: /bin/bash -c "go build -o server main.go && ./server"
+        command: /bin/bash -c "./server"
         restart: always
         working_dir: /var/www/html/proxy/ #进入容器的默认目录
         environment:
