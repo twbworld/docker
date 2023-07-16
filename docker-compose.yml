@@ -24,67 +24,68 @@ x-logging: &default-logging
 
 services:
 
-    nginx:
-        image: nginx:${nginx:-latest}
-        container_name: nginx
-        hostname: docker-nginx
-        #   - redis
-        restart: always
-        working_dir: /var/www/html/ #进入容器的默认目录
-        environment:
-          TZ: ${TZ:-Asia/Shanghai}
-        ports: #docker是有独立的firewall规则的,即时宿主机对外关闭某个端口,实际上docker的相同端口并不会被作用,除非docker本身规则禁止对外,如 127.0.0.1:80:80
-            - 80:80
-            - 443:443
-        volumes:
-            - ${PWD}/../thinkPHP5.1-admin/:/var/www/html/thinkPHP5.1-admin/:rw #运行目录
-            - ${PWD}/../test/:/var/www/html/test/:rw #运行目录
-            - ${PWD}/conf/nginx/nginx.conf:/etc/nginx/nginx.conf:ro #nginx根配置
-            - ${PWD}/conf/nginx/conf.d/:/etc/nginx/conf.d/:ro #nginx配置
-            - ${PWD}/conf/nginx/404.html:/usr/share/nginx/html/404.html:ro
-            - ${PWD}/../docker/:/root/docker/:ro
-            - ${PWD}/data/logs/nginx/:/var/www/logs/:rw #日志
-            # - logs_volume:/var/www/logs/:rw
-        logging: *default-logging
-        networks:
-            net1:
-                ipv4_address: 172.1.1.99
-                aliases:
-                  - nginx
-                  - docker-nginx
-                  - twbhub.com
-                  - twbhub.cf
+    # nginx:
+    #     image: nginx:${nginx:-latest}
+    #     container_name: nginx
+    #     hostname: docker-nginx
+    #     #   - redis
+    #     restart: always
+    #     working_dir: /var/www/html/ #进入容器的默认目录
+    #     environment:
+    #       TZ: ${TZ:-Asia/Shanghai}
+    #     ports: #docker是有独立的firewall规则的,即时宿主机对外关闭某个端口,实际上docker的相同端口并不会被作用,除非docker本身规则禁止对外,如 127.0.0.1:80:80
+    #         - 80:80
+    #         - 443:443
+    #         - 192.168.111.111:6443:6443
+    #     volumes:
+    #         - ${PWD}/../thinkPHP5.1-admin/:/var/www/html/thinkPHP5.1-admin/:rw #运行目录
+    #         - ${PWD}/../test/:/var/www/html/test/:rw #运行目录
+    #         - ${PWD}/conf/nginx/nginx.conf:/etc/nginx/nginx.conf:ro #nginx根配置
+    #         - ${PWD}/conf/nginx/conf.d/:/etc/nginx/conf.d/:ro #nginx配置
+    #         - ${PWD}/conf/nginx/404.html:/usr/share/nginx/html/404.html:ro
+    #         - ${PWD}/../docker/:/root/docker/:ro
+    #         - ${PWD}/data/logs/nginx/:/var/www/logs/:rw #日志
+    #         # - logs_volume:/var/www/logs/:rw
+    #     logging: *default-logging
+    #     networks:
+    #         net1:
+    #             ipv4_address: 172.1.1.99
+    #             aliases:
+    #               - nginx
+    #               - docker-nginx
+    #               - twbhub.com
+    #               - twbhub.cf
 
-    php:
-        # build:
-        #     context: ${PWD}/conf/php-phalcon-swoole-redis
-        #     dockerfile: Dockerfile
-        image: ghcr.io/twbworld/php-phalcon-swoole-redis:${php:-latest}
-        container_name: php
-        hostname: docker-php
-        # depends_on:
-        #     - mysql
-        #     - mysql56
-        command: /bin/bash -c "docker-php-entrypoint php-fpm && service cron start && chmod +x /etc/cron.monthly/*" #启动cron
-        restart: always
-        working_dir: /var/www/html/ #进入容器的默认目录
-        environment:
-            TZ: ${TZ:-Asia/Shanghai}
-        volumes:
-            - ${PWD}/../thinkPHP5.1-admin/:/var/www/html/thinkPHP5.1-admin/:rw #运行目录
-            - ${PWD}/conf/php/php.ini:/usr/local/etc/php/php.ini:ro #php配置
-            - ${PWD}/conf/php/www.conf:/usr/local/etc/php-fpm.d/www.conf:ro #php配置
-            - /root/.ssh/id_rsa:/var/www/.ssh/id_rsa:ro #ssh私钥,用于github验证
-            - /root/.ssh/known_hosts:/var/www/.ssh/known_hosts:ro #记录github服务器的白名单
-            - ${PWD}/data/logs/php/:/var/www/logs/:rw #日志
-        logging: *default-logging
-        networks:
-            net1:
-                ipv4_address: 172.1.1.98
-                aliases:
-                  - php
-                  - docker-php
-                  - php7
+    # php:
+    #     # build:
+    #     #     context: ${PWD}/conf/php-phalcon-swoole-redis
+    #     #     dockerfile: Dockerfile
+    #     image: ghcr.io/twbworld/php-phalcon-swoole-redis:${php:-latest}
+    #     container_name: php
+    #     hostname: docker-php
+    #     # depends_on:
+    #     #     - mysql
+    #     #     - mysql56
+    #     command: /bin/bash -c "docker-php-entrypoint php-fpm && service cron start && chmod +x /etc/cron.monthly/*" #启动cron
+    #     restart: always
+    #     working_dir: /var/www/html/ #进入容器的默认目录
+    #     environment:
+    #         TZ: ${TZ:-Asia/Shanghai}
+    #     volumes:
+    #         - ${PWD}/../thinkPHP5.1-admin/:/var/www/html/thinkPHP5.1-admin/:rw #运行目录
+    #         - ${PWD}/conf/php/php.ini:/usr/local/etc/php/php.ini:ro #php配置
+    #         - ${PWD}/conf/php/www.conf:/usr/local/etc/php-fpm.d/www.conf:ro #php配置
+    #         - /root/.ssh/id_rsa:/var/www/.ssh/id_rsa:ro #ssh私钥,用于github验证
+    #         - /root/.ssh/known_hosts:/var/www/.ssh/known_hosts:ro #记录github服务器的白名单
+    #         - ${PWD}/data/logs/php/:/var/www/logs/:rw #日志
+    #     logging: *default-logging
+    #     networks:
+    #         net1:
+    #             ipv4_address: 172.1.1.98
+    #             aliases:
+    #               - php
+    #               - docker-php
+    #               - php7
 
     # php56:
     #     image: ghcr.io/twbworld/php-phalcon-swoole-redis:${php56:-php-5.6}
@@ -112,34 +113,86 @@ services:
     #               - php5
     #               - php56
 
-    mysql:
-        image: mysql:${mysql:-latest}
-        container_name: mysql
-        hostname: docker-mysql
+    # mysql:
+    #     image: mysql:${mysql:-latest}
+    #     container_name: mysql
+    #     hostname: docker-mysql
+    #     restart: always
+    #     user: root
+    #     environment: #设置环境变量
+    #         TZ: ${TZ:-Asia/Shanghai}
+    #         MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+    #         MYSQL_USER:
+    #         MYSQL_PASSWORD:
+    #         # MYSQL_DATABASE:
+    #     ports:
+    #         - 127.0.0.1:3306:3306
+    #         - 192.168.111.111:3306:3306
+    #     volumes:
+    #         - ${PWD}/../thinkPHP5.1-admin/docs/tp.sql:/docker-entrypoint-initdb.d/tp.sql:ro #把sql放在docker-entrypoint-initdb.d下,mysql会自动执行
+    #         - ${PWD}/../phalcon_shop/docs/panda36_all.sql:/docker-entrypoint-initdb.d/panda36_all.sql:ro
+    #         - /usr/local/mysql8-docker/data/:/var/lib/mysql/:rw #库数据,一旦使用,设置的环境变量和自动执行sql功能则失效
+    #         - ${PWD}/conf/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro #配置文件
+    #         - ${PWD}/data/logs/mysql/:/var/www/logs/:rw #日志
+    #     logging: *default-logging
+    #     networks:
+    #         net1:
+    #             ipv4_address: 172.1.1.97
+    #             aliases:
+    #               - mysql
+    #               - docker-mysql
+    #               - mysql8
+    # trojan:
+    #     image: jrohy/trojan:latest
+    #     container_name: trojan
+    #     restart: always
+    #     privileged: true
+    #     tty: true
+    #     environment:
+    #         TZ: ${TZ:-Asia/Shanghai}
+    #     logging: *default-logging
+    #     volumes:
+    #         - ${PWD}/data/cert/cc.cc/:/a/:ro
+    #         - ${PWD}/../../trojan-2.15.2/asset/trojan-install.sh:/trojan-install.sh:rw
+    #     networks:
+    #         net1:
+    #             ipv4_address: 172.1.1.85
+
+    trojan-go:
+        # build:
+        #     context: ${PWD}/../docker-v2ray-trojan
+        #     dockerfile: Dockerfile
+        # image: ubuntu:20.04
+        image: ghcr.io/twbworld/v2ray-trojan:1.2.16
+        container_name: trojan-go
         restart: always
-        command: /bin/bash -c "chown -R www-data:www-data /var/lib/mysql /var/run/mysqld &&  mysqld"
-        environment: #设置环境变量
+        privileged: true
+        tty: true
+        command: /bin/bash -c 'apt-get update && apt-get install -y --no-install-recommends --no-install-suggests tzdata && echo "Asia/Shanghai" > /etc/timezone && /usr/local/bin/trojan web'
+        environment:
             TZ: ${TZ:-Asia/Shanghai}
-            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
-            MYSQL_USER:
-            MYSQL_PASSWORD:
-            # MYSQL_DATABASE:
-        ports:
-            - 127.0.0.1:3306:3306
-        volumes:
-            - ${PWD}/../thinkPHP5.1-admin/docs/tp.sql:/docker-entrypoint-initdb.d/tp.sql:ro #把sql放在docker-entrypoint-initdb.d下,mysql会自动执行
-            - ${PWD}/../phalcon_shop/docs/panda36_all.sql:/docker-entrypoint-initdb.d/panda36_all.sql:ro
-            - /usr/local/mysql8-docker/data/:/var/lib/mysql/:rw #库数据,一旦使用,设置的环境变量和自动执行sql功能则失效
-            - ${PWD}/conf/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro #配置文件
-            - ${PWD}/data/logs/mysql/:/var/www/logs/:rw #日志
         logging: *default-logging
+        volumes:
+            - ${PWD}/data/cert/cc.cc/:/a/:ro
+            - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime:ro
         networks:
             net1:
-                ipv4_address: 172.1.1.97
-                aliases:
-                  - mysql
-                  - docker-mysql
-                  - mysql8
+                ipv4_address: 172.1.1.84
+
+    # proxy:
+    #     image: ghcr.io/twbworld/proxy:latest
+    #     depends_on:
+    #       - mysql
+    #     restart: always
+    #     working_dir: /app/ #进入容器的默认目录
+    #     environment:
+    #         TZ: ${TZ:-Asia/Shanghai}
+    #     volumes:
+    #         - ${PWD}/../proxy/config/.env:/app/config/.env:ro #运行目录
+    #     logging: *default-logging
+    #     networks:
+    #         net1:
+    #             ipv4_address: 172.1.1.86
 
     # mysql56:
     #     image: mysql:${mysql56:-5.6}
@@ -167,6 +220,28 @@ services:
     #             aliases:
     #               - mysql5
     #               - mysql56
+
+
+    # mysql57:
+    #     image: mysql:${mysql57:-5.7}
+    #     container_name: mysql57
+    #     hostname: docker-mysql
+    #     restart: always
+    #     environment: #设置环境变量
+    #         TZ: ${TZ:-Asia/Shanghai}
+    #         MYSQL_ROOT_PASSWORD: ${MYSQL5_ROOT_PASSWORD:-root}
+    #         MYSQL_USER:
+    #         MYSQL_PASSWORD:
+    #         MYSQL_DATABASE:
+    #     ports:
+    #         - 3306:3306
+    #     logging: *default-logging
+    #     networks:
+    #         net1:
+    #             ipv4_address: 172.1.1.95
+    #             aliases:
+    #               - mysql5
+    #               - mysql57
 
     # redis:
     #     image: redis:${redis:-latest}
@@ -313,3 +388,47 @@ services:
     #             aliases:
     #               - qinglong
     #               - docker-qinglong
+
+    # go:
+    #     image: golang:${golang:-latest}
+    #     container_name: go
+    #     hostname: docker-go
+    #     command: /bin/bash -c "go build -o server main.go && ./server"
+    #     restart: always
+    #     working_dir: /var/www/html/proxy/ #进入容器的默认目录
+    #     environment:
+    #       TZ: ${TZ:-Asia/Shanghai}
+    #       GO111MODULE: "on"
+    #       GOPATH: "/go"
+    #     volumes:
+    #         - ${GOPATH:-/root/go}/pkg/:/go/pkg/:rw
+    #         - ${PWD}/../proxy/:/var/www/html/proxy/:rw #运行目录
+    #         - ${PWD}/data/logs/go/:/var/www/html/proxy/log/:rw #日志
+    #     logging: *default-logging
+    #     networks:
+    #         net1:
+    #             ipv4_address: 172.1.1.88
+    #             aliases:
+    #               - go
+    #               - golang
+    #               - docker-go
+
+    # rancher:
+    #     image: rancher/server:${rancher:-stable}
+    #     container_name: rancher
+    #     hostname: docker-rancher
+    #     depends_on:
+    #       - mysql57
+    #     command: /bin/bash -c "/usr/bin/s6-svscan /service --db-host 172.1.1.1 --db-user root --db-pass root --db-name cattle"
+    #     ports:
+    #       - 8081:8080
+    #     restart: unless-stopped
+    #     environment:
+    #       TZ: ${TZ:-Asia/Shanghai}
+    #     logging: *default-logging
+    #     networks:
+    #         net1:
+    #             ipv4_address: 172.1.1.87
+    #             aliases:
+    #               - rancher
+    #               - docker-rancher
