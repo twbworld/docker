@@ -27,15 +27,15 @@ services:
         image: nginx:${nginx:-latest}
         container_name: nginx
         hostname: docker-nginx
-        depends_on:
-          - php
-          - go
-          - mysql
-          - qinglong
-          - trojan
+        # depends_on:
+        #   - php
+        #   - go
+        #   - mysql
+        #   - qinglong
+        #   - trojan
         restart: always
         # user: www-data
-        working_dir: /var/www/html/ #进入容器的默认目录
+        working_dir: /var/www/ #进入容器的默认目录
         # env_file: ./.env
         environment:
           TZ: ${TZ:-Asia/Shanghai}
@@ -48,12 +48,11 @@ services:
             - 2096:443
             - 8443:443
         volumes:
-            - ${PWD}/../../html/:/var/www/html/:rw
+            - ${PWD}/../../www:/var/www/:rw
             - ${PWD}/conf/nginx/nginx.conf:/etc/nginx/nginx.conf:ro #nginx根配置
             - ${PWD}/conf/nginx/conf.d/:/etc/nginx/conf.d/:ro #nginx配置
             - ${PWD}/conf/nginx/404.html:/usr/share/nginx/html/404.html:ro
-            - ${PWD}/../docker/:/root/docker/:ro
-            - ${PWD}/data/logs/nginx/:/var/www/logs/:rw #日志
+            - ${PWD}/data/logs/nginx/:/var/logs/:rw #日志
         logging: *default-logging
         deploy:
             resources:
@@ -68,75 +67,8 @@ services:
                   - docker-nginx
                   - twbhub.top
 
-    php:
-        # build:
-        #     context: ${PWD}/conf/php-phalcon-swoole-redis
-        #     dockerfile: Dockerfile
-        image: ghcr.io/twbworld/php-phalcon-swoole-redis:${php:-latest}
-        container_name: php
-        hostname: docker-php
-        depends_on:
-            - mysql
-        command: /bin/bash -c "docker-php-entrypoint php-fpm && service cron start && chmod +x /etc/cron.monthly/*" #启动cron
-        restart: always
-        working_dir: /var/www/html/ #进入容器的默认目录
-        environment:
-            TZ: ${TZ:-Asia/Shanghai}
-        volumes:
-            - ${PWD}/../../html/:/var/www/html/:rw
-            - ${PWD}/conf/php/php.ini:/usr/local/etc/php/php.ini:ro #php配置
-            - ${PWD}/conf/php/www.conf:/usr/local/etc/php-fpm.d/www.conf:ro #php配置
-            - /root/.ssh/id_rsa:/root/.ssh/id_rsa:ro #ssh私钥,用于github验证
-            - /root/.ssh/known_hosts:/root/.ssh/known_hosts:ro #记录github服务器的白名单
-            - ${PWD}/data/logs/php/:/var/www/logs/:rw #日志
-        logging: *default-logging
-        deploy:
-            resources:
-                limits:
-                    cpus: 1.5
-                    memory: 512M
-                reservations:
-                    memory: 16M
-        networks:
-            net1:
-                ipv4_address: 172.1.1.98
-                aliases:
-                  - docker-php
-
-    go:
-        image: golang:${golang:-latest}
-        container_name: go
-        hostname: docker-go
-        depends_on:
-            - mysql
-        command: /bin/bash -c "./server"
-        restart: always
-        working_dir: /var/www/html/proxy/ #进入容器的默认目录
-        environment:
-          TZ: ${TZ:-Asia/Shanghai}
-          GO111MODULE: "on"
-          GOPATH: "/go"
-        volumes:
-            - ${GOPATH:-/root/go}/pkg/:/go/pkg/:rw
-            - ${PWD}/../proxy/:/var/www/html/proxy/:rw #运行目录
-            - ${PWD}/data/logs/go/:/var/www/html/proxy/log/:rw #日志
-        logging: *default-logging
-        deploy:
-            resources:
-                limits:
-                    memory: 256M
-                reservations:
-                    memory: 16M
-        networks:
-            net1:
-                ipv4_address: 172.1.1.88
-                aliases:
-                  - go
-                  - golang
-                  - docker-go
-
     mysql:
-        image: mysql:${mysql:-latest}
+        image: mysql:${mysql:-8.0-debian}
         container_name: mysql
         hostname: docker-mysql
         restart: always
@@ -146,9 +78,10 @@ services:
         ports:
             - 127.0.0.1:3306:3306
         volumes:
+            - ${PWD}/../proxy/dao/users.sql:/docker-entrypoint-initdb.d/users.sql:ro #把sql放在docker-entrypoint-initdb.d下,mysql会自动执行
             - /usr/local/mysql8-docker/data/:/var/lib/mysql:rw #库数据,一旦使用,设置的环境变量和自动执行sql功能则失效
             - ${PWD}/conf/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro #配置文件
-            - ${PWD}/data/logs/mysql/:/var/www/logs/:rw #日志
+            - ${PWD}/data/logs/mysql/:/var/logs/:rw #日志
         logging: *default-logging
         deploy:
             resources:
@@ -159,164 +92,323 @@ services:
                     memory: 64M
         networks:
             net1:
-                ipv4_address: 172.1.1.97
+                ipv4_address: 172.1.1.98
                 aliases:
                   - docker-mysql
 
-    trojan:
-        image: ghcr.io/twbworld/v2ray-trojan:${trojan:-latest}
-        container_name: trojan
-        hostname: docker-trojan
-        tty: true
-        privileged: true
-        command: /bin/bash -c "/sbin/init"
-        depends_on:
-            - mysql
-        restart: always
-        environment: #设置环境变量
-            TZ: ${TZ:-Asia/Shanghai}
-        volumes:
-            - ${PWD}/../docker/:/root/docker/:rw
-            - /etc/localtime:/etc/localtime:ro
-            - /root/.ssh/id_rsa:/root/.ssh/id_rsa:ro #ssh私钥,用于github验证
-            - /root/.ssh/known_hosts:/root/.ssh/known_hosts:ro #记录github服务器的白名单
-        logging: *default-logging
-        deploy:
-            resources:
-                limits:
-                    memory: 512M
-                reservations:
-                    memory: 16M
-        networks:
-            net1:
-                ipv4_address: 172.1.1.96
-                aliases:
-                  - trojan
-                  - docker-trojan
-                  - trojan-go
+    # php:
+    #     # build:
+    #     #     context: ${PWD}/conf/php
+    #     #     dockerfile: Dockerfile
+    #     image: ghcr.io/twbworld/php:${php:-latest}
+    #     container_name: php
+    #     hostname: docker-php
+    #     depends_on:
+    #         - mysql
+    #     command: /bin/bash -c "docker-php-entrypoint php-fpm && service cron start && chmod +x /etc/cron.monthly/*" #启动cron
+    #     restart: always
+    #     working_dir: /var/www/ #进入容器的默认目录
+    #     environment:
+    #         TZ: ${TZ:-Asia/Shanghai}
+    #     volumes:
+    #         - ${PWD}/../../www/:/var/www/:rw
+    #         - /root/.ssh/id_rsa:/root/.ssh/id_rsa:ro #ssh私钥,用于github验证
+    #         - /root/.ssh/known_hosts:/root/.ssh/known_hosts:ro #记录github服务器的白名单
+    #         - ${PWD}/data/logs/php/:/var/logs/:rw #日志
+    #     logging: *default-logging
+    #     deploy:
+    #         resources:
+    #             limits:
+    #                 cpus: 1.5
+    #                 memory: 512M
+    #             reservations:
+    #                 memory: 16M
+    #     networks:
+    #         net1:
+    #             ipv4_address: 172.1.1.97
+    #             aliases:
+    #               - docker-php
+
+    # trojan:
+    #     image: p4gefau1t/trojan-go:${trojan:-latest}
+    #     container_name: trojan
+    #     hostname: docker-trojan
+    #     tty: true
+    #     privileged: true
+    #     command: /bin/bash -c "/sbin/init"
+    #     depends_on:
+    #         - mysql
+    #     restart: always
+    #     environment: #设置环境变量
+    #         TZ: ${TZ:-Asia/Shanghai}
+    #     volumes:
+    #         - ${PWD}/data/cert/cc.cc/:/root/cert/:ro
+    #         - ${PWD}/proxy/config/.trojan-go.json:/etc/trojan-go/config.json:rw
+    #     logging: *default-logging
+    #     deploy:
+    #         resources:
+    #             limits:
+    #                 memory: 512M
+    #             reservations:
+    #                 memory: 16M
+    #     networks:
+    #         net1:
+    #             ipv4_address: 172.1.1.96
+    #             aliases:
+    #               - trojan
+    #               - docker-trojan
+    #               - trojan-go
+
+    # redis:
+    #     image: redis:${redis:-latest}
+    #     container_name: redis
+    #     hostname: docker-redis
+    #     restart: always
+    #     environment:
+    #         TZ: ${TZ:-Asia/Shanghai}
+    #     logging: *default-logging
+    #     networks:
+    #         net1:
+    #             ipv4_address: 172.1.1.94
+    #             aliases:
+    #               - redis
+    #               - docker-redis
+    #               - redis6
 
 
-    qinglong:
-        image: whyour/qinglong
-        container_name: qinglong
-        hostname: docker-qinglong
-        entrypoint:
-              - /bin/bash
-              - -c
-              - | #环境变量失效请执行: source /ql/data/config/env.sh
-               echo "{\"username\":\"${QL_USERNAME:-root}\",\"password\":\"${QL_PASSWORD:-root}\",\"token\":\"${QL_TOKEN}\",\"retries\":0,\"twoFactorActivated\":false,\"twoFactorActived\":false}" > /ql/sample/auth.sample.json
-               sed -i "s/js py/js py sh/" /ql/sample/config.sample.sh
-               sed -i "s/crond/#crond/" /ql/docker/docker-entrypoint.sh
-               ./docker/docker-entrypoint.sh
-               sleep 3s
-               nginx -s stop
-               echo "export TG_BOT_TOKEN=\"${JD_TG_BOT_TOKEN}\"" >> /ql/data/config/env.sh
-               echo "export TG_USER_ID=\"${TG_CHAT_ID}\"" >> /ql/data/config/env.sh
-               echo "export JD_COOKIE=\"${JD_COOKIE}\"" >> /ql/data/config/env.sh
-               source /ql/data/config/env.sh
-               bash <(curl -s -S -L https://ghproxy.com/https://raw.githubusercontent.com/RayWangQvQ/BiliBiliToolPro/main/qinglong/ray-dotnet-install.sh)
-               ql repo https://github.com/RayWangQvQ/BiliBiliToolPro.git "bili_task_"
-               ql repo https://github.com/zero205/JD_tencent_scf.git "jd_|jx_|getJDCookie" "backUp|icon" "^jd[^_]|USER|sendNotify|sign_graphics_validate|JDJR|JDSign" "main"
-               crond -f >/dev/null
-            # ql repo https://github.com/twbworld/NeteaseCloudMusicTasks.git "index.py" "" "py" "main"
-            # cp /ql/repo/twbworld_NeteaseCloudMusicTasks_main/config.json /ql/scripts/twbworld_NeteaseCloudMusicTasks_main/
-            # apk --no-cache add -f bash pip g++
-            # pip install -r /ql/repo/twbworld_NeteaseCloudMusicTasks_main/requirements.txt --no-cache-dir
-        restart: always
-        environment:
-            TZ: ${TZ:-Asia/Shanghai}
-            TG_USER_ID: ${TG_CHAT_ID} #已交由entrypoint处理
-            USERNAME_163: ${USERNAME_163}
-            PASSWORD_163: ${PASSWORD_163}
-            Ray_BiliBiliCookies__1: ${BLBL_COOKIES}
-            Ray_Security__UserAgent: ${UA}
-            Ray_DailyTaskConfig__NumberOfCoins: ${BLBL_Ray_DailyTaskConfig__NumberOfCoins:-5} #投币数量
-            Ray_DailyTaskConfig__SelectLike: ${BLBL_Ray_DailyTaskConfig__SelectLike:-true} #投币同时点赞
-            Ray_DailyTaskConfig__SupportUpIds: ${BLBL_Ray_DailyTaskConfig__SupportUpIds:-401876304} #优先支持的up主Id
-            Ray_DailyTaskConfig__AutoChargeUpId: ${BLBL_Ray_DailyTaskConfig__AutoChargeUpId:--1} #充电对象;-1:自己
-            Ray_Serilog__WriteTo__3__Args__botToken: ${BILI_TG_BOT_TOKEN}
-            Ray_Serilog__WriteTo__3__Args__chatId: ${TG_CHAT_ID}
-            IP_163: ${IP_163}
-            TG_BOT_TOKEN_163: ${TG_BOT_TOKEN_163}
-            TG_BOT_TOKEN: ${JD_TG_BOT_TOKEN} #已交由entrypoint处理
-            JD_COOKIE: ${JD_COOKIE}
-            JD_JOIN_ZLC: ${JD_JOIN_ZLC:-false} #是否加入互助
-            JD_USER_AGENT:
-            gua_cleancart_Run: ${gua_cleancart_Run:-true} #柠檬赚金币
-            JD_TRY: ${JD_TRY:-true} #京东试用
-            XFXD: ${XFXD:-true}
-            cfd_rp: ${cfd_rp:-true}
-            FS_LEVEL: ${FS_LEVEL:-car} #电脑配件
-            MARKET_COIN_TO_BEANS: ${MARKET_COIN_TO_BEANS:-100} #东东超市兑换奖品
-            PETSHARECODES: #东东萌宠互助码
-            PLANT_BEAN_SHARECODES: #种豆得豆互助码
-            DDFACTORY_SHARECODES: #东东工厂互助码
-            JDSGMH_SHARECODES: #闪购盲盒互助码
-            JDCFD_SHARECODES: #京喜财富岛互助码
-            FRUITSHARECODES: #东东农场互助码
-            JD_CASH_SHARECODES: #签到领现金互助码
-            DREAM_FACTORY_SHARE_CODES: #京喜工厂互助码
-            JDZZ_SHARECODES: #京东赚赚互助码
-            JDJOY_SHARECODES: #疯狂的JOY互助码
-            BOOKSHOP_SHARECODES: #京东书店互助码
-            JXNC_SHARECODES: #京喜农场互助码
-            dyjCode: #大赢家互助码
-            TYT_PACKETID: #推一推互助码
-            MONEYTREE_SHARECODES: #摇钱树互助码
-            InviterPin: #柠檬赚金币邀请码
-            SEVENDAY_LIST: #7天店铺签到
-            JRBODY: #jd_bean_sign.js金融APP签到(需要cookie)
-            DPQDTK: #店铺签到token
-        volumes:
-            - ${PWD}/data/tmp/qinglong/static/:/ql/static/dist/:rw #为了给nginx容器
-            - /root/.ssh/id_rsa:/root/.ssh/id_rsa:ro #ssh私钥,用于github验证
-            - /root/.ssh/known_hosts:/root/.ssh/known_hosts:ro #记录github服务器的白名单
-        logging: *default-logging
-        deploy:
-            resources:
-                limits:
-                    cpus: 1
-                    memory: 1024M
-        networks:
-            net1:
-                ipv4_address: 172.1.1.89
-                aliases:
-                  - qinglong
-                  - docker-qinglong
 
-    jd:
-        image: python:${python:-latest}
-        container_name: jd
-        hostname: docker-jd
-        restart: always
-        working_dir: /var
-        command:
-            - /bin/bash
-            - -c
-            - |
-                curl -LO https://github.com/twbworld/JD-SHOPPER/archive/refs/heads/master.tar.gz
-                tar -xzf master.tar.gz
-                rm -f master.tar.gz
-                mv JD-SHOPPER-master /var/jd
-                cd /var/jd
-                python -m pip install --upgrade pip
-                pip install -r requirements.txt
-                rm -f /var/jd/Config/config.ini
-                ln -s /config.ini /var/jd/Config/config.ini
-                python3 runserver.py
-        environment:
-            TZ: ${TZ:-Asia/Shanghai}
-        volumes:
-            - ${PWD}/data/tmp/jd/config.ini:/config.ini:rw
-            - /etc/localtime:/etc/localtime:ro
-        logging: *default-logging
-        deploy:
-            resources:
-                limits:
-                    cpus: 1
-                    memory: 516M
-        networks:
-          net1:
-              ipv4_address: 172.1.1.87
-              aliases:
-                - docker-jd
+
+    # proxy:
+    #     # image: ghcr.io/twbworld/proxy:0.1.0
+    #     build:
+    #         context: ${PWD}/../proxy
+    #         dockerfile: Dockerfile
+    #     container_name: proxy
+    #     # depends_on:
+    #     #   - mysql
+    #     restart: always
+    #     working_dir: /app/ #进入容器的默认目录
+    #     ports:
+    #         - 8080:8080
+    #     volumes:
+    #         - ${PWD}/../proxy/config/.env:/app/config/.env:ro
+    #         - ${PWD}/../proxy/config/.trojan-go:/app/config/.trojan-go:ro
+    #     logging: *default-logging
+    #     networks:
+    #         net1:
+    #             ipv4_address: 172.1.1.86
+
+    # es:
+    #     image: elasticsearch:${es:-latest}
+    #     container_name: es
+    #     hostname: docker-es
+    #     restart: always
+    #     environment:
+    #         TZ: ${TZ:-Asia/Shanghai}
+    #         ES_JAVA_OPTS:
+    #         discovery.type:
+    #     ports:
+    #         - 9200:9200
+    #         - 9300:9300
+    #     volumes:
+    #         - /var/www/es/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+    #         - /var/www/es/data/:/usr/share/elasticsearch/data/:rw
+    #         - /var/www/es/plugins/:/usr/share/elasticsearch/plugins/:rw
+    #     logging: *default-logging
+    #     networks:
+    #         net1:
+    #             ipv4_address: 172.1.1.92
+    #             aliases:
+    #               - es
+    #               - docker-es
+    #               - es7
+
+    # kibana:
+    #     image: kibana:${kibana:-latest}
+    #     container_name: kibana
+    #     hostname: docker-kibana
+    #     depends_on:
+    #         - es
+    #     restart: always
+    #     ports:
+    #         - 5601:5601
+    #     volumes:
+    #         - /var/www/es/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+    #     environment:
+    #         TZ: ${TZ:-Asia/Shanghai}
+    #         ELASTICSEARCH_HOSTS:
+    #     logging: *default-logging
+    #     networks:
+    #         net1:
+    #             ipv4_address: 172.1.1.91
+    #             aliases:
+    #               - kibana
+    #               - docker-kibana
+
+    # logstash:
+    #     image: docker.elastic.co/logstash/logstash:${logstash:-latest}
+    #     container_name: logstash
+    #     hostname: docker-logstash
+    #     depends_on:
+    #         - kibana
+    #     restart: always
+    #     environment:
+    #         TZ: ${TZ:-Asia/Shanghai}
+    #     ports:
+    #         - 5044:5044
+    #     volumes:
+    #         - /var/www/es/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+    #         - /var/www/es/logstash/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+    #         - /var/www/es/logstash/mysql-connector-java-8.0.23/mysql-connector-java-8.0.23.jar:/usr/share/logstash/pipeline/mysql-connector-java-8.0.23.jar:rw
+    #     logging: *default-logging
+    #     networks:
+    #         net1:
+    #             ipv4_address: 172.1.1.90
+    #             aliases:
+    #               - logstash
+    #               - docker-logstash
+
+    # rancher:
+    #     image: rancher/server:${rancher:-stable}
+    #     container_name: rancher
+    #     hostname: docker-rancher
+    #     depends_on:
+    #       - mysql57
+    #     command: /bin/bash -c "/usr/bin/s6-svscan /service --db-host 172.1.1.1 --db-user root --db-pass root --db-name cattle"
+    #     ports:
+    #       - 8081:8080
+    #     restart: unless-stopped
+    #     environment:
+    #       TZ: ${TZ:-Asia/Shanghai}
+    #     logging: *default-logging
+    #     networks:
+    #         net1:
+    #             ipv4_address: 172.1.1.87
+    #             aliases:
+    #               - rancher
+    #               - docker-rancher
+
+    # qinglong:
+    #     image: whyour/qinglong
+    #     container_name: qinglong
+    #     hostname: docker-qinglong
+    #     entrypoint:
+    #           - /bin/bash
+    #           - -c
+    #           - | #环境变量失效请执行: source /ql/data/config/env.sh
+    #            echo "{\"username\":\"${QL_USERNAME:-root}\",\"password\":\"${QL_PASSWORD:-root}\",\"token\":\"${QL_TOKEN}\",\"retries\":0,\"twoFactorActivated\":false,\"twoFactorActived\":false}" > /ql/sample/auth.sample.json
+    #            sed -i "s/js py/js py sh/" /ql/sample/config.sample.sh
+    #            sed -i "s/crond/#crond/" /ql/docker/docker-entrypoint.sh
+    #            ./docker/docker-entrypoint.sh
+    #            sleep 3s
+    #            nginx -s stop
+    #            echo "export TG_BOT_TOKEN=\"${JD_TG_BOT_TOKEN}\"" >> /ql/data/config/env.sh
+    #            echo "export TG_USER_ID=\"${TG_CHAT_ID}\"" >> /ql/data/config/env.sh
+    #            echo "export JD_COOKIE=\"${JD_COOKIE}\"" >> /ql/data/config/env.sh
+    #            source /ql/data/config/env.sh
+    #            bash <(curl -s -S -L https://ghproxy.com/https://raw.githubusercontent.com/RayWangQvQ/BiliBiliToolPro/main/qinglong/ray-dotnet-install.sh)
+    #            ql repo https://github.com/RayWangQvQ/BiliBiliToolPro.git "bili_task_"
+    #            ql repo https://github.com/zero205/JD_tencent_scf.git "jd_|jx_|getJDCookie" "backUp|icon" "^jd[^_]|USER|sendNotify|sign_graphics_validate|JDJR|JDSign" "main"
+    #            crond -f >/dev/null
+    #         # ql repo https://github.com/twbworld/NeteaseCloudMusicTasks.git "index.py" "" "py" "main"
+    #         # cp /ql/repo/twbworld_NeteaseCloudMusicTasks_main/config.json /ql/scripts/twbworld_NeteaseCloudMusicTasks_main/
+    #         # apk --no-cache add -f bash pip g++
+    #         # pip install -r /ql/repo/twbworld_NeteaseCloudMusicTasks_main/requirements.txt --no-cache-dir
+    #     restart: always
+    #     environment:
+    #         TZ: ${TZ:-Asia/Shanghai}
+    #         TG_USER_ID: ${TG_CHAT_ID} #已交由entrypoint处理
+    #         USERNAME_163: ${USERNAME_163}
+    #         PASSWORD_163: ${PASSWORD_163}
+    #         Ray_BiliBiliCookies__1: ${BLBL_COOKIES}
+    #         Ray_Security__UserAgent: ${UA}
+    #         Ray_DailyTaskConfig__NumberOfCoins: ${BLBL_Ray_DailyTaskConfig__NumberOfCoins:-5} #投币数量
+    #         Ray_DailyTaskConfig__SelectLike: ${BLBL_Ray_DailyTaskConfig__SelectLike:-true} #投币同时点赞
+    #         Ray_DailyTaskConfig__SupportUpIds: ${BLBL_Ray_DailyTaskConfig__SupportUpIds:-401876304} #优先支持的up主Id
+    #         Ray_DailyTaskConfig__AutoChargeUpId: ${BLBL_Ray_DailyTaskConfig__AutoChargeUpId:--1} #充电对象;-1:自己
+    #         Ray_Serilog__WriteTo__3__Args__botToken: ${BILI_TG_BOT_TOKEN}
+    #         Ray_Serilog__WriteTo__3__Args__chatId: ${TG_CHAT_ID}
+    #         IP_163: ${IP_163}
+    #         TG_BOT_TOKEN_163: ${TG_BOT_TOKEN_163}
+    #         TG_BOT_TOKEN: ${JD_TG_BOT_TOKEN} #已交由entrypoint处理
+    #         JD_COOKIE: ${JD_COOKIE}
+    #         JD_JOIN_ZLC: ${JD_JOIN_ZLC:-false} #是否加入互助
+    #         JD_USER_AGENT:
+    #         gua_cleancart_Run: ${gua_cleancart_Run:-true} #柠檬赚金币
+    #         JD_TRY: ${JD_TRY:-true} #京东试用
+    #         XFXD: ${XFXD:-true}
+    #         cfd_rp: ${cfd_rp:-true}
+    #         FS_LEVEL: ${FS_LEVEL:-car} #电脑配件
+    #         MARKET_COIN_TO_BEANS: ${MARKET_COIN_TO_BEANS:-100} #东东超市兑换奖品
+    #         PETSHARECODES: #东东萌宠互助码
+    #         PLANT_BEAN_SHARECODES: #种豆得豆互助码
+    #         DDFACTORY_SHARECODES: #东东工厂互助码
+    #         JDSGMH_SHARECODES: #闪购盲盒互助码
+    #         JDCFD_SHARECODES: #京喜财富岛互助码
+    #         FRUITSHARECODES: #东东农场互助码
+    #         JD_CASH_SHARECODES: #签到领现金互助码
+    #         DREAM_FACTORY_SHARE_CODES: #京喜工厂互助码
+    #         JDZZ_SHARECODES: #京东赚赚互助码
+    #         JDJOY_SHARECODES: #疯狂的JOY互助码
+    #         BOOKSHOP_SHARECODES: #京东书店互助码
+    #         JXNC_SHARECODES: #京喜农场互助码
+    #         dyjCode: #大赢家互助码
+    #         TYT_PACKETID: #推一推互助码
+    #         MONEYTREE_SHARECODES: #摇钱树互助码
+    #         InviterPin: #柠檬赚金币邀请码
+    #         SEVENDAY_LIST: #7天店铺签到
+    #         JRBODY: #jd_bean_sign.js金融APP签到(需要cookie)
+    #         DPQDTK: #店铺签到token
+    #     volumes:
+    #         - ${PWD}/data/tmp/qinglong/static/:/ql/static/dist/:rw #为了给nginx容器
+    #         - /root/.ssh/id_rsa:/root/.ssh/id_rsa:ro #ssh私钥,用于github验证
+    #         - /root/.ssh/known_hosts:/root/.ssh/known_hosts:ro #记录github服务器的白名单
+    #     logging: *default-logging
+    #     deploy:
+    #         resources:
+    #             limits:
+    #                 cpus: 1
+    #                 memory: 1024M
+    #     networks:
+    #         net1:
+    #             ipv4_address: 172.1.1.89
+    #             aliases:
+    #               - qinglong
+    #               - docker-qinglong
+
+    # jd:
+    #     image: python:${python:-latest}
+    #     container_name: jd
+    #     hostname: docker-jd
+    #     restart: always
+    #     working_dir: /var
+    #     command:
+    #         - /bin/bash
+    #         - -c
+    #         - |
+    #             curl -LO https://github.com/twbworld/JD-SHOPPER/archive/refs/heads/master.tar.gz
+    #             tar -xzf master.tar.gz
+    #             rm -f master.tar.gz
+    #             mv JD-SHOPPER-master /var/jd
+    #             cd /var/jd
+    #             python -m pip install --upgrade pip
+    #             pip install -r requirements.txt
+    #             rm -f /var/jd/Config/config.ini
+    #             ln -s /config.ini /var/jd/Config/config.ini
+    #             python3 runserver.py
+    #     environment:
+    #         TZ: ${TZ:-Asia/Shanghai}
+    #     volumes:
+    #         - ${PWD}/data/tmp/jd/config.ini:/config.ini:rw
+    #         - /etc/localtime:/etc/localtime:ro
+    #     logging: *default-logging
+    #     deploy:
+    #         resources:
+    #             limits:
+    #                 cpus: 1
+    #                 memory: 516M
+    #     networks:
+    #       net1:
+    #           ipv4_address: 172.1.1.87
+    #           aliases:
+    #             - docker-jd
