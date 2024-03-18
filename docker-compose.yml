@@ -96,38 +96,44 @@ services:
                 aliases:
                   - docker-mysql
 
-    # php:
-    #     # build:
-    #     #     context: ${PWD}/conf/php
-    #     #     dockerfile: Dockerfile
-    #     image: ghcr.io/twbworld/php:${php:-latest}
-    #     container_name: php
-    #     hostname: docker-php
-    #     depends_on:
-    #         - mysql
-    #     command: /bin/bash -c "docker-php-entrypoint php-fpm && service cron start && chmod +x /etc/cron.monthly/*" #启动cron
-    #     restart: always
-    #     working_dir: /var/www/ #进入容器的默认目录
-    #     environment:
-    #         TZ: ${TZ:-Asia/Shanghai}
-    #     volumes:
-    #         - ${PWD}/../../www/:/var/www/:rw
-    #         - /root/.ssh/id_rsa:/root/.ssh/id_rsa:ro #ssh私钥,用于github验证
-    #         - /root/.ssh/known_hosts:/root/.ssh/known_hosts:ro #记录github服务器的白名单
-    #         - ${PWD}/data/logs/php/:/var/logs/:rw #日志
-    #     logging: *default-logging
-    #     deploy:
-    #         resources:
-    #             limits:
-    #                 cpus: 1.5
-    #                 memory: 512M
-    #             reservations:
-    #                 memory: 16M
-    #     networks:
-    #         net1:
-    #             ipv4_address: 172.1.1.97
-    #             aliases:
-    #               - docker-php
+    php:
+        # build:
+        #     context: ${PWD}/conf/php
+        #     dockerfile: Dockerfile
+        image: ghcr.io/twbworld/php:${php:-latest}
+        container_name: php
+        hostname: docker-php
+        depends_on:
+            - mysql
+        command:
+            - /bin/bash
+            - -c
+            - |
+                chmod +x /etc/cron.monthly/*
+                service cron start
+                docker-php-entrypoint php-fpm
+        restart: always
+        working_dir: /var/www/ #进入容器的默认目录
+        environment:
+            TZ: ${TZ:-Asia/Shanghai}
+        volumes:
+            - ${PWD}/../../www/:/var/www/:rw
+            - /root/.ssh/id_rsa:/root/.ssh/id_rsa:ro #ssh私钥,用于github验证
+            - /root/.ssh/known_hosts:/root/.ssh/known_hosts:ro #记录github服务器的白名单
+            - ${PWD}/data/logs/php/:/var/logs/:rw #日志
+        logging: *default-logging
+        deploy:
+            resources:
+                limits:
+                    cpus: 1.5
+                    memory: 512M
+                reservations:
+                    memory: 16M
+        networks:
+            net1:
+                ipv4_address: 172.1.1.97
+                aliases:
+                  - docker-php
 
     # trojan:
     #     image: p4gefau1t/trojan-go:${trojan:-latest}
