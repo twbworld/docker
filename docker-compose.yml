@@ -27,12 +27,9 @@ services:
         image: nginx:${nginx:-latest}
         container_name: nginx
         hostname: docker-nginx
-        # depends_on:
-        #   - php
-        #   - go
-        #   - mysql
-        #   - qinglong
-        #   - trojan
+        depends_on:
+          - mysql
+          - php
         restart: always
         # user: www-data
         working_dir: /var/www/ #进入容器的默认目录
@@ -42,11 +39,7 @@ services:
         ports: #docker是有独立的firewall规则的,即时宿主机对外关闭某个端口,实际上docker的相同端口并不会被作用,除非docker本身规则禁止对外,如 127.0.0.1:80:80
             - 80:80
             - 443:443
-            - 2053:443
-            - 2083:443
-            - 2087:443
-            - 2096:443
-            - 8443:443
+            - 1818:1818
         volumes:
             - ${PWD}/../../www:/var/www/:rw
             - ${PWD}/conf/nginx/nginx.conf:/etc/nginx/nginx.conf:ro #nginx根配置
@@ -75,10 +68,12 @@ services:
         user: root #容器内的目录需给root权限/var/lib/mysql /var/run/mysqld
         environment: #设置环境变量
             TZ: ${TZ:-Asia/Shanghai}
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: sxzyy
         ports:
             - 127.0.0.1:3306:3306
         volumes:
-            - ${PWD}/../proxy/dao/users.sql:/docker-entrypoint-initdb.d/users.sql:ro #把sql放在docker-entrypoint-initdb.d下,mysql会自动执行
+            # - ${PWD}/data/tmp/sxzyy-adm/sxzyy-test.sql:/docker-entrypoint-initdb.d/sxzyy-test.sql:ro #把sql放在docker-entrypoint-initdb.d下,mysql会自动执行
             - /usr/local/mysql8-docker/data/:/var/lib/mysql:rw #库数据,一旦使用,设置的环境变量和自动执行sql功能则失效
             - ${PWD}/conf/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro #配置文件
             - ${PWD}/data/logs/mysql/:/var/logs/:rw #日志
@@ -100,7 +95,8 @@ services:
         # build:
         #     context: ${PWD}/conf/php
         #     dockerfile: Dockerfile
-        image: ghcr.io/twbworld/php:${php:-latest}
+        # image: php:${php:-latest}
+        image: ghcr.io/twbworld/php:1
         container_name: php
         hostname: docker-php
         depends_on:
@@ -111,6 +107,7 @@ services:
             - |
                 chmod +x /etc/cron.monthly/*
                 service cron start
+                nohup php /var/www/dcat-admin-demo/artisan serve --host=0.0.0.0 &
                 docker-php-entrypoint php-fpm
         restart: always
         working_dir: /var/www/ #进入容器的默认目录
@@ -134,6 +131,93 @@ services:
                 ipv4_address: 172.1.1.97
                 aliases:
                   - docker-php
+
+    php8:
+        # build:
+        #     context: ${PWD}/conf/php
+        #     dockerfile: Dockerfile
+        # image: php:${php:-latest}
+        image: ghcr.io/twbworld/php:2
+        container_name: php8
+        hostname: docker-php8
+        depends_on:
+            - mysql
+        command:
+            - /bin/bash
+            - -c
+            - |
+                chmod +x /etc/cron.monthly/*
+                service cron start
+                docker-php-entrypoint php-fpm
+        restart: always
+        working_dir: /var/www/ #进入容器的默认目录
+        environment:
+            TZ: ${TZ:-Asia/Shanghai}
+        volumes:
+            - ${PWD}/../../www/:/var/www/:rw
+            - /root/.ssh/id_rsa:/root/.ssh/id_rsa:ro #ssh私钥,用于github验证
+            - /root/.ssh/known_hosts:/root/.ssh/known_hosts:ro #记录github服务器的白名单
+            - ${PWD}/data/logs/php8/:/var/logs/:rw #日志
+        logging: *default-logging
+        deploy:
+            resources:
+                limits:
+                    cpus: 1.5
+                    memory: 512M
+                reservations:
+                    memory: 16M
+        networks:
+            net1:
+                ipv4_address: 172.1.1.85
+                aliases:
+                  - docker-php8
+
+    node:
+        # build:
+        #     context: ${PWD}/conf/php
+        #     dockerfile: Dockerfile
+        # image: php:${php:-latest}
+        image: node:20-alpine
+        container_name: node
+        hostname: docker-node
+        depends_on:
+            - php
+            - php8
+        command:
+            - /bin/sh
+            - -c
+            - |
+                sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+                apk add xdg-utils
+                echo "nginx medical-group.cc.cc" >> /etc/hosts
+                npm run dev -- --host 0.0.0.0
+        restart: always
+        working_dir: /var/www/medical-group/web/
+        environment:
+            TZ: ${TZ:-Asia/Shanghai}
+        volumes:
+            - ${PWD}/../medical-group/:/var/www/medical-group/:rw
+        logging: *default-logging
+        networks:
+            net1:
+                ipv4_address: 172.1.1.84
+                aliases:
+                  - docker-node
+    redis:
+        image: redis:${redis:-latest}
+        container_name: redis
+        hostname: docker-redis
+        restart: always
+        environment:
+            TZ: ${TZ:-Asia/Shanghai}
+        logging: *default-logging
+        networks:
+            net1:
+                ipv4_address: 172.1.1.94
+                aliases:
+                  - redis
+                  - docker-redis
+                  - redis6
 
     # trojan:
     #     image: p4gefau1t/trojan-go:${trojan:-latest}
@@ -165,21 +249,6 @@ services:
     #               - docker-trojan
     #               - trojan-go
 
-    # redis:
-    #     image: redis:${redis:-latest}
-    #     container_name: redis
-    #     hostname: docker-redis
-    #     restart: always
-    #     environment:
-    #         TZ: ${TZ:-Asia/Shanghai}
-    #     logging: *default-logging
-    #     networks:
-    #         net1:
-    #             ipv4_address: 172.1.1.94
-    #             aliases:
-    #               - redis
-    #               - docker-redis
-    #               - redis6
 
 
 
