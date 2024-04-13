@@ -27,12 +27,9 @@ services:
         image: nginx:${nginx:-latest}
         container_name: nginx
         hostname: docker-nginx
-        # depends_on:
-        #   - php
-        #   - go
-        #   - mysql
-        #   - qinglong
-        #   - trojan
+        depends_on:
+          - php
+          - mysql
         restart: always
         # user: www-data
         working_dir: /var/www/ #进入容器的默认目录
@@ -47,6 +44,8 @@ services:
             - 2087:443
             - 2096:443
             - 8443:443
+            - 1818:1818
+            - 1819:1819
         volumes:
             - ${PWD}/../../www:/var/www/:rw
             - ${PWD}/conf/nginx/nginx.conf:/etc/nginx/nginx.conf:ro #nginx根配置
@@ -135,6 +134,50 @@ services:
                 aliases:
                   - docker-php
 
+    node:
+        image: node:${node:-21-alpine}
+        container_name: node
+        hostname: docker-node
+        # tty: true
+        depends_on:
+            - php
+        command:
+            - /bin/sh
+            - -c
+            - |
+                sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+                apk add xdg-utils
+                echo "nginx ck.cc.cc" >> /etc/hosts
+                npm run dev -- --host 0.0.0.0
+        restart: always
+        working_dir: /var/www/ck/web/
+        environment:
+            TZ: ${TZ:-Asia/Shanghai}
+        volumes:
+            - ${PWD}/../ck/:/var/www/ck/:rw
+        logging: *default-logging
+        networks:
+            net1:
+                ipv4_address: 172.1.1.84
+                aliases:
+                  - docker-node
+
+    # redis:
+    #     image: redis:${redis:-latest}
+    #     container_name: redis
+    #     hostname: docker-redis
+    #     restart: always
+    #     environment:
+    #         TZ: ${TZ:-Asia/Shanghai}
+    #     logging: *default-logging
+    #     networks:
+    #         net1:
+    #             ipv4_address: 172.1.1.94
+    #             aliases:
+    #               - redis
+    #               - docker-redis
+    #               - redis6
+
     # trojan:
     #     image: p4gefau1t/trojan-go:${trojan:-latest}
     #     container_name: trojan
@@ -164,25 +207,6 @@ services:
     #               - trojan
     #               - docker-trojan
     #               - trojan-go
-
-    # redis:
-    #     image: redis:${redis:-latest}
-    #     container_name: redis
-    #     hostname: docker-redis
-    #     restart: always
-    #     environment:
-    #         TZ: ${TZ:-Asia/Shanghai}
-    #     logging: *default-logging
-    #     networks:
-    #         net1:
-    #             ipv4_address: 172.1.1.94
-    #             aliases:
-    #               - redis
-    #               - docker-redis
-    #               - redis6
-
-
-
 
     # proxy:
     #     # image: ghcr.io/twbworld/proxy:0.1.0
